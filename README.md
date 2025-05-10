@@ -67,7 +67,7 @@ router.add(
 - Header
 
 ## Server
-http::Server accepts an http::Router to handle various routes and manages clients using multiple threads. It is responsible for setting up the socket and binding the address and port.
+`http::Server` accepts an `http::Router` to handle various routes and manages clients using multiple threads. It is responsible for setting up the socket and binding the address and port.
 
 ### Example
 ```cpp
@@ -90,4 +90,5 @@ meson compile -C build
 meson install -C build
 ```
 
-> Checkout `example/` directory for project integration and example.
+## Docs
+Checkout `example/` directory for project integration and example.
