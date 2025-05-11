@@ -22,6 +22,7 @@ struct Request {
   std::string url;
   std::map<std::string, std::string> params;
   Header header;
+  std::string body;
 
   std::vector<std::string> segments() const;
 };

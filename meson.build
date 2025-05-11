@@ -1,7 +1,7 @@
 project(
   'http',
   'cpp',
-  version: '1.0.0',
+  version: '1.0.1',
   default_options: [
     'cpp_std=c++23',
     'cpp_flags=-Wall -Werror -Wextra',
@@ -11,10 +11,10 @@ project_description = 'simple and lightweight web framework for C++'
 
 incdir = include_directories('include')
 srcs = files(
-  'libs/logger.cc',
-  'libs/router.cc',
-  'libs/server.cc',
-  'libs/types.cc',
+  'src/logger.cc',
+  'src/router.cc',
+  'src/server.cc',
+  'src/types.cc',
 )
 
 http = static_library(
