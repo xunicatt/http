@@ -8,6 +8,8 @@
 #include <regex>
 #include <sstream>
 #include <string>
+#include <sys/poll.h>
+#include <sys/types.h>
 #include <utility>
 #include <unistd.h>
 
@@ -15,12 +17,26 @@
 #include <status.h>
 #include <types.h>
 
+#ifndef CLIENT_POLLING_TIMEOUT
+  #define CLIENT_POLLING_TIMEOUT 500
+#endif
+
+#ifndef CLIENT_READ_BUFFER_SIZE
+  #define CLIENT_READ_BUFFER_SIZE 512
+#endif
+
 using ParsedURL = std::pair<std::string, std::map<std::string, std::string>>;
 
-static ParsedURL parse_url(const std::string&);
-static std::pair<std::string, std::string> parse_header_line(const std::string&);
-static std::optional<http::Request> parse(const int&);
+[[nodiscard]]
 static std::string readline(const int&);
+[[nodiscard]]
+static std::optional<http::Request> parse(const int&);
+[[nodiscard]]
+static ParsedURL parse_url(const std::string&);
+[[nodiscard]]
+static std::pair<std::string, std::string> parse_header_line(const std::string&);
+[[nodiscard]]
+static std::string parse_body(const int&, const std::optional<size_t>&);
 
 static const std::map<std::string, http::Method> methods = {
   {"GET", http::Method::GET},
@@ -110,6 +126,12 @@ std::optional<http::Request> parse(const int& fd) {
     .url = url,
     .params = params,
     .header = header,
+    .body = parse_body(
+      fd,
+      header.contains("Content-Length") ?
+        std::optional<size_t>(std::stol(header.at("Content-Length"))) :
+        std::nullopt
+    ) ,
   };
 }
 
@@ -163,6 +185,44 @@ std::pair<std::string, std::string> parse_header_line(const std::string& line) {
   }
 
   return {line.substr(0, pos), line.substr(pos + 1)};
+}
+
+std::string parse_body(const int& fd, const std::optional<size_t>& vlen) {
+  http::debug("parsing body");
+  if(vlen.has_value()) {
+    http::debug(std::format("got body length: {}", vlen.value()));
+    size_t len = vlen.value();
+    char* buffer = new char[len + 1];
+
+    len = read(fd, buffer, len);
+
+    buffer[len] = '\0';
+    std::string body{ buffer };
+    delete[] buffer;
+
+    return body;
+  }
+
+  constexpr const size_t size = CLIENT_READ_BUFFER_SIZE;
+  char buffer[size] = {0};
+  std::string body;
+
+  pollfd fds[1] = {
+    (pollfd){.fd = fd, .events = POLLIN },
+  };
+
+  while(true) {
+    http::debug("waiting for read using poll()");
+    if(poll(fds, 1, CLIENT_POLLING_TIMEOUT) <= 0) break;
+    if(fds[0].revents & POLLIN) {
+      ssize_t len = 0;
+      if(len = read(fd, buffer, size - 1); len <= 0) break;
+      buffer[len] = '\0';
+      body += buffer;
+    }
+  }
+
+  return body;
 }
 
 std::string readline(const int& fd) {

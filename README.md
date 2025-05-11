@@ -59,7 +59,7 @@ router.add(
 - URL parameters
 - Headers
 - Segment parser for URL
-- Body [WIP]
+- Body
 
 ### Represents an HTTP response (http::Response):
 - Body

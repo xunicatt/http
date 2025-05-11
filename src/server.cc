@@ -21,58 +21,9 @@
 #include <router.h>
 
 static http::SignalHandler signal_handler { .close_intp = false };
-
-static void signal_handler_func(int) {
-  http::info("received shutdown signal");
-  std::lock_guard<std::mutex> guard(signal_handler.mut);
-  signal_handler.close_intp = true;
-}
-
-static void client_handler_func_multi_threaded(
-  const http::Router& router,
-  const int client
-) {
-  const std::string res = router.handle(client);
-  write(client, res.c_str(), res.length());
-  http::debug("send response to client");
-
-  if(close(client) < 0) {
-    http::error(strerror(errno));
-    return;
-  }
-
-  http::debug("connection closed with client");
-  return;
-}
-
-static void client_handler_func(
-  const http::Router& router,
-  int& sock,
-  sockaddr* addr,
-  socklen_t* len
-) {
-  while(true) {
-    int client = accept(sock, addr, len);
-    http::debug("connected to a client");
-
-    if(client < 0) {
-      if(errno == EBADF || errno == EINVAL) {
-        return;
-      }
-
-      http::error(strerror(errno));
-      continue;
-    }
-
-    http::debug("launched sub client handler in a new thread");
-    std::thread client_handler(
-      client_handler_func_multi_threaded,
-      std::cref(router),
-      client
-    );
-    client_handler.detach();
-  }
-}
+static void signal_handler_func(int);
+static void client_handler_func_multi_threaded(const http::Router&,const int);
+static void client_handler_func(const http::Router&,int&,sockaddr*,socklen_t*);
 
 namespace http {
 Server::Server(const Router& router)
@@ -166,4 +117,56 @@ int Server::run() {
   client_hanlder.join();
   return 0;
 }
+}
+
+static void signal_handler_func(int) {
+  http::info("received shutdown signal");
+  std::lock_guard<std::mutex> guard(signal_handler.mut);
+  signal_handler.close_intp = true;
+}
+
+static void client_handler_func_multi_threaded(
+  const http::Router& router,
+  const int client
+) {
+  const std::string res = router.handle(client);
+  write(client, res.c_str(), res.length());
+  http::debug("sent response to client");
+
+  if(close(client) < 0) {
+    http::error(strerror(errno));
+    return;
+  }
+
+  http::debug("connection closed with client");
+  return;
+}
+
+static void client_handler_func(
+  const http::Router& router,
+  int& sock,
+  sockaddr* addr,
+  socklen_t* len
+) {
+  while(true) {
+    int client = accept(sock, addr, len);
+    http::debug("connected to a client");
+
+    if(client < 0) {
+      if(errno == EBADF || errno == EINVAL) {
+        return;
+      }
+
+      http::error(strerror(errno));
+      continue;
+    }
+
+    http::debug("launched sub client handler in a new thread");
+    std::thread client_handler(
+      client_handler_func_multi_threaded,
+      std::cref(router),
+      client
+    );
+    client_handler.detach();
+  }
 }

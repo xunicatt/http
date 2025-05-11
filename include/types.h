@@ -24,6 +24,7 @@ struct Request {
   Header header;
   std::string body;
 
+  [[nodiscard]]
   std::vector<std::string> segments() const;
 };
 
@@ -37,6 +38,7 @@ public:
   void set_body(const std::string&);
   void set_code(const HttpStatusCode&);
 
+  [[nodiscard]]
   std::string to_string() const;
 
 private:

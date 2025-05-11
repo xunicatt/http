@@ -4,6 +4,7 @@
 #include <sstream>
 
 static void set_default_header_fields(http::Header&);
+[[nodiscard]]
 static std::string header_to_string(const http::Header&);
 
 namespace http {

@@ -18,6 +18,7 @@ struct RouteHandler {
 class Router {
 public:
   void add(const std::string&, const Method&, const RouteFunc&);
+  [[nodiscard]]
   std::string handle(const int&) const;
 
 private:

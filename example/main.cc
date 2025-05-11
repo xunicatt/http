@@ -1,11 +1,11 @@
 #include <format>
-#include <print>
 #include <cerrno>
+#include <print>
 #include <cstring>
-#include <string>
 #include <http/http.h>
 
 int main() {
+  // set log level
   http::loglevel(http::LogLevel::INFO);
   http::Router router;
 
@@ -13,12 +13,17 @@ int main() {
     return http::Response("Hello, World!");
   });
 
+  // routes with pattern matching using regex
   router.add("/user/.+$", http::Method::GET, [](const http::Request& req) {
+    // get the last segment in the url
+    // /user/..../<username>
     const auto username = req.segments().back();
     return http::Response(std::format("welcome back {}", username));
   });
 
   router.add("/id/[0-9]", http::Method::GET, [](const http::Request& req) {
+    // get the last segment in the url
+    // /id/..../<id>
     const auto& id = std::stoi(req.segments().back());
     return http::Response(std::format("user id: {}", id));
   });
@@ -27,10 +32,17 @@ int main() {
     std::string response =
       std::format(
        "Hello! {}",
+       // get the parameters if exists
+       // /hello?name=<name>
        req.params.contains("name") ? req.params.at("name") : "buddy"
       );
 
     return http::Response(response);
+  });
+
+  router.add("/body", http::Method::POST, [](const http::Request& req) {
+    // get the body
+    return http::Response(req.body.length() == 0 ? "no body??" : req.body);
   });
 
   http::Server server(router);

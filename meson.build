@@ -44,3 +44,8 @@ install_headers(
   'include/types.h',
   subdir: meson.project_name(),
 )
+
+http_dep = declare_dependency(
+  include_directories: include_directories('include'),
+  link_with: http,
+)

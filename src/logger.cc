@@ -27,6 +27,6 @@ void debug(const std::string& msg) {
 }
 
 void error(const std::string& msg) {
-  std::println("[ERROR] {}", msg);
+  std::println(stderr, "[ERROR] {}", msg);
 }
 }

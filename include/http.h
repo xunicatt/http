@@ -1,14 +1,27 @@
 #ifndef __HTTP_H__
 #define __HTTP_H__
 
-#define __HTTP_VERSION_STR__ "1.0.1"
-#define __HTTP_VERSION_MAJ__ 1
-#define __HTTP_VERSION_MIN__ 0
-#define __HTTP_VERSION_PTC__ 1
+#include <format>
 
 #include "logger.h"
 #include "types.h"
 #include "router.h"
 #include "server.h"
+
+#define __HTTP_VERSION_MAJ__ 1
+#define __HTTP_VERSION_MIN__ 0
+#define __HTTP_VERSION_PTC__ 2
+
+namespace http {
+[[nodiscard]]
+constexpr inline std::string version() {
+  return std::format(
+    "v{}.{}.{}",
+    __HTTP_VERSION_MAJ__,
+    __HTTP_VERSION_MIN__,
+    __HTTP_VERSION_PTC__
+  );
+}
+}
 
 #endif

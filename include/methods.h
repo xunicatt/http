@@ -11,6 +11,7 @@ enum Method {
   DELETE,
 };
 
+[[nodiscard]]
 std::string to_string(const Method&);
 }
 #endif

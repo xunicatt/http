@@ -77,12 +77,20 @@ enum HttpStatusCode {
 	NetworkAuthenticationRequired = 511,
 };
 
+[[nodiscard]]
 std::string to_string(const HttpStatusCode&);
+
+[[nodiscard]]
 inline bool is_informational(const HttpStatusCode&);
+[[nodiscard]]
 inline bool is_successful(const HttpStatusCode&);
+[[nodiscard]]
 inline bool is_redirection(const HttpStatusCode&);
+[[nodiscard]]
 inline bool is_client_error(const HttpStatusCode&);
+[[nodiscard]]
 inline bool is_server_error(const HttpStatusCode&);
+[[nodiscard]]
 inline bool is_error(const HttpStatusCode&);
 }
 

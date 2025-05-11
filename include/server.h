@@ -11,6 +11,7 @@ public:
   Server(const Router&);
   Server& port(const uint16_t&);
   Server& addrs(const std::string&);
+  [[nodiscard]]
   int run();
 
 private:
