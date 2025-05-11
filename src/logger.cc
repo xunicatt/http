@@ -2,7 +2,7 @@
 #include <print>
 
 namespace http {
-static LogLevel level;
+static LogLevel level = LogLevel::INFO;
 
 void loglevel(const LogLevel& vlevel) {
   level = vlevel;
