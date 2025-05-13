@@ -24,26 +24,28 @@ http = static_library(
   install: true,
 )
 
-pkg_mod = import('pkgconfig')
-pkg_mod.generate(
-  name: meson.project_name(),
-  description: project_description,
-  version: meson.project_version(),
-  libraries: http,
-  subdirs: 'include',
-  install_dir: get_option('libdir') / 'pkgconfig',
-)
+if not meson.is_subproject()
+  pkg_mod = import('pkgconfig')
+  pkg_mod.generate(
+    name: meson.project_name(),
+    description: project_description,
+    version: meson.project_version(),
+    libraries: http,
+    subdirs: 'include',
+    install_dir: get_option('libdir') / 'pkgconfig',
+  )
 
-install_headers(
-  'include/http.h',
-  'include/logger.h',
-  'include/methods.h',
-  'include/router.h',
-  'include/server.h',
-  'include/status.h',
-  'include/types.h',
-  subdir: meson.project_name(),
-)
+  install_headers(
+    'include/http.h',
+    'include/logger.h',
+    'include/methods.h',
+    'include/router.h',
+    'include/server.h',
+    'include/status.h',
+    'include/types.h',
+    subdir: meson.project_name(),
+  )
+endif
 
 http_dep = declare_dependency(
   include_directories: include_directories('include'),

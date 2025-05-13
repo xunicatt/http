@@ -84,10 +84,77 @@ if(server.port(8080).run() < 0) {
 - meson
 - linux/macos
 
+### System Wide
 ```bash
 meson setup build
 meson compile -C build
 meson install -C build
+```
+
+### As a Meson Project
+To use `http` as a meson subproject we have to make a project structure like this:
+- meson.build
+- main.cc
+- subprojects/
+  - http/
+
+```bash
+mkdir <project-name>
+cd $_
+touch main.cc meson.build
+mkdir subprojects
+git clone https://github.com/xunicatt/http.git ./subprojects/http
+```
+
+meson.build:
+```meson
+project(
+  'example',
+  'cpp',
+  default_options: [
+    'cpp_std=c++23',
+    'cpp_flags=-Wall -Wextra -Werror',
+  ],
+)
+
+http = subproject('http')
+
+executable(
+  meson.project_name(),
+  'main.cc',
+  dependencies: [
+    http.get_variable('http_dep'),
+  ],
+)
+```
+
+main.cc:
+```cpp
+#include <http.h>
+#include <cstring>
+
+int main() {
+  http::Router router;
+  router.add("/", http::Method::GET, [](const http::Request& req){
+    return http::Response("Hello, World!");
+  });
+
+  http::Server server(router);
+  if(server.port(8080).run() < 0) {
+    perror(strerror(errno));
+    return 1;
+  }
+
+  return 0;
+}
+```
+
+Now to build and run it:
+```bash
+meson setup build
+cd build
+ninja
+./example
 ```
 
 ## Docs
