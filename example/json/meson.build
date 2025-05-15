@@ -8,7 +8,7 @@ project(
   ],
 )
 
-http_dep = dependency(
+http = subproject(
   'http',
   default_options: [
     'cpp_args=-DHTTP_EXPERIMENTAL_MODULES',
@@ -19,5 +19,7 @@ http_dep = dependency(
 executable(
   meson.project_name(),
   'main.cc',
-  dependencies: [http_dep],
+  dependencies: [
+    http.get_variable('http_dep'),
+  ],
 )

@@ -1,0 +1,3 @@
+[submodule "example/json/subprojects/http"]
+	path = example/json/subprojects/http
+	url = https://github.com/xunicatt/http.git
