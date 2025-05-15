@@ -1,7 +1,7 @@
 project(
   'http',
   'cpp',
-  version: '1.0.1',
+  version: '1.0.3',
   default_options: [
     'cpp_std=c++23',
     'cpp_flags=-Wall -Werror -Wextra',
@@ -11,6 +11,7 @@ project_description = 'simple and lightweight web framework for C++'
 
 incdir = include_directories('include')
 srcs = files(
+  'src/json.cc',
   'src/logger.cc',
   'src/router.cc',
   'src/server.cc',
@@ -43,6 +44,7 @@ if not meson.is_subproject()
     'include/server.h',
     'include/status.h',
     'include/types.h',
+    'include/json.h',
     subdir: meson.project_name(),
   )
 endif

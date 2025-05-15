@@ -55,6 +55,7 @@ router.add(
 ## Request & Response
 ### Represents an HTTP request (http::Request):
 - Method
+
 - URL
 - URL parameters
 - Headers
@@ -84,14 +85,14 @@ if(server.port(8080).run() < 0) {
 - meson
 - linux/macos
 
-### System Wide
+### System Wide:
 ```bash
 meson setup build
 meson compile -C build
 meson install -C build
 ```
 
-### As a Meson Project
+### As a Meson Project:
 To use `http` as a meson subproject we have to make a project structure like this:
 - meson.build
 - main.cc
@@ -156,6 +157,18 @@ cd build
 ninja
 ./example
 ```
+
+## Experimental Modules
+> [!WARNING]
+> EXPERIMENTAL MODULES ARE NOT READY FOR GENERAL USE. THESE MODULES MAY HAVE INCOMPLETE FEATURES AND ARE SUBJECT TO CHANGE OR BREAK AT ANY TIME.
+
+To use experimental modules from 'http' in a meson subproject, we have to enable `HTTP_EXPERIMENTAL_MODULES` flag by using:
+```bash
+meson setup build -Dhttp:cpp_args="-DHTTP_EXPERIMENTAL_MODULES" -Dcpp_args="-DHTTP_EXPERIMENTAL_MODULES"
+```
+
+### Modules:
+- json
 
 ## Docs
 Checkout `example/` directory for project integration and example.

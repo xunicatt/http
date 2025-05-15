@@ -8,9 +8,13 @@
 #include "router.h"
 #include "server.h"
 
+#ifdef HTTP_EXPERIMENTAL_MODULES
+  #include "json.h"
+#endif
+
 #define __HTTP_VERSION_MAJ__ 1
 #define __HTTP_VERSION_MIN__ 0
-#define __HTTP_VERSION_PTC__ 2
+#define __HTTP_VERSION_PTC__ 3
 
 namespace http {
 [[nodiscard]]

@@ -1,5 +1,5 @@
 project(
-  'example',
+  'hello_world',
   'cpp',
   default_options: [
     'cpp_std=c++23',
