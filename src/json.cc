@@ -1,3 +1,4 @@
+#ifdef HTTP_EXPERIMENTAL_MODULES
 #include <json.h>
 #include <format>
 #include <ranges>
@@ -99,3 +100,4 @@ static std::string json_value_to_string(
       return {};
   }
 }
+#endif
