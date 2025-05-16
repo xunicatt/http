@@ -5,6 +5,7 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <variant>
 
 #include "status.h"
 #include "methods.h"
@@ -47,5 +48,64 @@ private:
   Header header;
 };
 }
+
+#ifdef HTTP_EXPERIMENTAL_MODULES
+
+namespace json {
+class Node;
+enum class NodeType {
+  Int,
+  Float,
+  Bool,
+  String,
+  Array,
+  Object,
+};
+
+[[nodiscard]]
+std::string to_string(const NodeType&);
+
+using Array = std::vector<Node>;
+using Object = std::map<std::string, Node>;
+using Data = std::variant<
+  int,
+  double,
+  bool,
+  std::string,
+  Array,
+  Object
+>;
+
+class Node {
+public:
+  Node(const int&);
+  Node(const double&);
+  Node(const bool&);
+  Node(const char*);
+  Node(const std::string&);
+  Node(const Array&);
+  Node(const Object&);
+
+  [[nodiscard]]
+  const NodeType& type() const;
+  [[nodiscard]]
+  const Data& get() const;
+  [[nodiscard]]
+  Data& get();
+  template <typename T>
+  [[nodiscard]]
+  T& get();
+  template <typename T>
+  [[nodiscard]]
+  const T& get() const;
+  [[nodiscard]]
+  std::string to_string() const;
+
+private:
+  Data data;
+  NodeType _type;
+};
+}
+#endif
 
 #endif

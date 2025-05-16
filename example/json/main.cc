@@ -1,57 +1,54 @@
 #include <print>
 #include <cstring>
 #include <http.h>
-#include <json.h>
 
-http::Response database(const http::Request& req) {
-  /*
-  // equivalent to:
-  {
-    "student": [
-      {
-        "name": "John",
-        "id": 187
-      },
-      {
-        "name": "Carol",
-        "id": 122
-      }
-    ],
-    "grades": [
-      8.3,
-      6.7
-    ]
+http::Response user(const http::Request& req) {
+  const auto bad_request = http::Response(http::HttpStatusCode::BadGateway);
+  if(!req.header.contains("Content-Type")) {
+    return bad_request;
   }
-  */
 
-  json::Value value = json::Object{
-    {"students", json::Array{
-      json::Object{
-        {"name", "John"},
-        {"id", 187}
-      },
-      json::Object{
-        {"name", "Carol"},
-        {"roll", 122}
-      }
-    }},
-    {"grades", json::Array{
-      8.3,
-      6.7
-    }}
+  if(req.header.at("Content-Type") != "application/json") {
+    return bad_request;
+  }
+
+  const auto& decoded_json = json::decode(req.body);
+  if(!decoded_json.has_value()) {
+    return http::Response(
+      decoded_json.error(),
+      http::HttpStatusCode::BadRequest
+    );
+  }
+
+  const auto& data = decoded_json.value();
+  const auto& obj = data.get<json::Object>();
+  if(!obj.contains("name")) {
+    return bad_request;
+  }
+
+  if(obj.at("name").type() != json::NodeType::String) {
+    return bad_request;
+  }
+
+  const auto& name = obj.at("name").get<std::string>();
+
+  json::Node node = json::Object{
+    {"user", name},
+    {"message", "welcome"}
   };
 
-  http::Response resp(json::encode(value));
+  http::Response resp(json::encode(node));
   resp.append_header("Content-Type", "application/json");
   return resp;
 }
 
 int main() {
   http::Router router;
-  router.add("/database", http::GET, database);
+  router.add("/user", http::GET, user);
+
   http::Server server(router);
   if(server.run() < 0) {
-    std::println("failed to run server: {}", strerror(errno));
+    std::println(stderr, "failed to run server: {}", strerror(errno));
     exit(EXIT_FAILURE);
   }
 }

@@ -179,12 +179,38 @@ ParsedURL parse_url(const std::string& url) {
 }
 
 std::pair<std::string, std::string> parse_header_line(const std::string& line) {
+  auto trim = [](std::string s) {
+      s.erase(
+        s.begin(),
+        std::find_if(
+          s.begin(),
+          s.end(),
+          [](unsigned char ch) {
+            return !std::isspace(ch);
+          }
+        )
+      );
+
+      s.erase(
+        std::find_if(
+          s.rbegin(),
+          s.rend(),
+          [](unsigned char ch) {
+            return !std::isspace(ch);
+          }
+        ).base(),
+        s.end()
+    );
+
+    return s;
+  };
+
   const size_t pos = line.find(":");
   if(pos == std::string::npos) {
     return {};
   }
 
-  return {line.substr(0, pos), line.substr(pos + 1)};
+  return {trim(line.substr(0, pos)), trim(line.substr(pos + 1))};
 }
 
 std::string parse_body(const int& fd, const std::optional<size_t>& vlen) {

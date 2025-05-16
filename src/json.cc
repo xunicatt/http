@@ -1,94 +1,93 @@
-#ifdef HTTP_EXPERIMENTAL_MODULES
 #include <json.h>
+
+#ifdef HTTP_EXPERIMENTAL_MODULES
+
+#include <parser.h>
 #include <format>
 #include <ranges>
-#include <print>
 
-static std::string json_value_to_string(const json::JsonValue&);
+[[nodiscard]]
+static std::string data_to_string(const json::Data&);
 
 namespace json {
-std::string to_string(const JsonValueType& t) {
-  switch(t) {
-    case JsonValueType::Int: return "int";
-    case JsonValueType::Float: return "float";
-    case JsonValueType::Bool: return "bool";
-    case JsonValueType::String: return "string";
-    case JsonValueType::Array: return "array";
-    case JsonValueType::Object: return "object";
-    default: return {};
-  }
+Node::Node(const int& data)
+: data(data), _type(NodeType::Int) {}
+
+Node::Node(const double& data)
+: data(data), _type(NodeType::Float) {}
+
+Node::Node(const bool& data)
+: data(data), _type(NodeType::Bool) {}
+
+Node::Node(const char* data)
+: data(data), _type(NodeType::String) {}
+
+Node::Node(const std::string& data)
+: data(data), _type(NodeType::String) {}
+
+Node::Node(const Array& data)
+: data(data), _type(NodeType::Array) {}
+
+Node::Node(const Object& data)
+: data(data), _type(NodeType::Object){}
+
+const NodeType& Node::type() const {
+  return _type;
 }
 
-Value::Value(const int& v)
-: value(v), _type(JsonValueType::Int) {}
-
-Value::Value(const int64_t& v)
-: value(v), _type(JsonValueType::Int) {}
-
-Value::Value(const double& v)
-: value(v), _type(JsonValueType::Float) {}
-
-Value::Value(const bool& v)
-: value(v), _type(JsonValueType::Bool) {}
-
-Value::Value(const std::string& v)
-: value(v), _type(JsonValueType::String) {}
-
-Value::Value(const char* v)
-: value(v), _type(JsonValueType::String) {}
-
-Value::Value(const Array& v)
-: value(v), _type(JsonValueType::Array) {}
-
-Value::Value(const Object& v)
-: value(v), _type(JsonValueType::Object) {}
-
-const JsonValueType& Value::type() const { return _type; }
-const JsonValue& Value::get() const { return value; }
-JsonValue& Value::get() { return value; }
-
-std::string to_string(const Value& value) {
-  return json_value_to_string(value.get());
+const Data& Node::get() const {
+  return data;
 }
 
-std::string encode(const Value& value) {
-  return to_string(value);
+Data& Node::get() {
+  return data;
+}
+
+std::string Node::to_string() const {
+  return data_to_string(data);
+}
+
+std::string encode(const Node& node) {
+  return node.to_string();
+}
+
+std::expected<Node, std::string> decode(const std::string& data) {
+  Scanner scanner(data);
+  Parser parser(scanner);
+  return parser.parse();
 }
 }
 
-static std::string json_value_to_string(
-  const json::JsonValue& val
-) {
-  switch((json::JsonValueType)val.index()) {
-    case json::JsonValueType::Int:
-      return std::to_string(std::get<int64_t>(val));
+std::string data_to_string(const json::Data& data) {
+  switch(static_cast<json::NodeType>(data.index())) {
+    case json::NodeType::Int:
+      return std::to_string(std::get<int>(data));
 
-    case json::JsonValueType::Float:
-      return std::to_string(std::get<double>(val));
+    case json::NodeType::Float:
+      return std::to_string(std::get<double>(data));
 
-    case json::JsonValueType::Bool:
-      return std::format("{}", std::get<bool>(val)?"true":"false");
+    case json::NodeType::Bool:
+      return std::get<bool>(data) ? "true" : "false";
 
-    case json::JsonValueType::String:
-      return std::format("\"{}\"", std::get<std::string>(val));
+    case json::NodeType::String:
+      return std::format("\"{}\"", std::get<std::string>(data));
 
-    case json::JsonValueType::Array: {
+    case json::NodeType::Array: {
       std::string res = "[";
-      auto const& arr = std::get<json::Array>(val);
-      for(const auto& [i, item]: arr | std::views::enumerate) {
-        res += json_value_to_string(item.get());
+      auto const& arr = std::get<json::Array>(data);
+      for(const auto& [i, x]: arr | std::views::enumerate) {
+        res += data_to_string(x.get());
         if(static_cast<size_t>(i) < arr.size() - 1) res += ", ";
       }
       res += "]";
       return res;
     }
 
-    case json::JsonValueType::Object: {
-      std::string res = "{";
-      const auto& obj = std::get<json::Object>(val);
-      size_t i = 0;
-      for(auto const& [k, v]: std::get<json::Object>(val)) {
-        res += std::format("\"{}\": {}", k, json_value_to_string(v.get()));
+    case json::NodeType::Object: {
+      std::string res = "{"; size_t i = 0;
+      const auto& obj = std::get<json::Object>(data);
+      for(auto const& [k, v]: obj) {
+        res += std::format("\"{}\": {}", k, data_to_string(v.get()));
         if(i < obj.size() - 1) res += ", ";
         i++;
       }
@@ -100,4 +99,5 @@ static std::string json_value_to_string(
       return {};
   }
 }
+
 #endif

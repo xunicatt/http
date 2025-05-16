@@ -1,7 +1,7 @@
 project(
   'http',
   'cpp',
-  version: '1.0.4',
+  version: '1.0.5',
   default_options: [
     'cpp_std=c++23',
     'cpp_flags=-Wall -Werror -Wextra',
@@ -13,6 +13,7 @@ incdir = include_directories('include')
 srcs = files(
   'src/json.cc',
   'src/logger.cc',
+  'src/parser.cc',
   'src/router.cc',
   'src/server.cc',
   'src/types.cc',
