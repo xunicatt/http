@@ -3,7 +3,7 @@
 #include <http.h>
 
 http::Response user(const http::Request& req) {
-  const auto bad_request = http::Response(http::HttpStatusCode::BadGateway);
+  const auto bad_request = http::Response(http::HttpStatusCode::BadRequest);
   if(!req.header.contains("Content-Type")) {
     return bad_request;
   }
