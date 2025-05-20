@@ -124,7 +124,7 @@ std::expected<Node, std::string> Parser::literal() {
 
 std::expected<Node, std::string> Parser::array() {
   Array array;
-  if(token = sc.token(); token == Token::LSQR) {
+  if(token = sc.token(); token == Token::RSQR) {
     return array;
   }
 
