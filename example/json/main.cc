@@ -3,13 +3,12 @@
 #include <http.h>
 
 http::Response user(const http::Request& req) {
-  const auto bad_request = http::Response(http::HttpStatusCode::BadRequest);
   if(!req.header.contains("Content-Type")) {
-    return bad_request;
+    return http::HttpStatusCode::BadRequest;
   }
 
   if(req.header.at("Content-Type") != "application/json") {
-    return bad_request;
+    return http::HttpStatusCode::BadRequest;
   }
 
   const auto& decoded_json = json::decode(req.body);
@@ -23,11 +22,11 @@ http::Response user(const http::Request& req) {
   const auto& data = decoded_json.value();
   const auto& obj = data.get<json::Object>();
   if(!obj.contains("name")) {
-    return bad_request;
+    return http::HttpStatusCode::BadRequest;
   }
 
   if(obj.at("name").type() != json::NodeType::String) {
-    return bad_request;
+    return http::HttpStatusCode::BadRequest;
   }
 
   const auto& name = obj.at("name").get<std::string>();

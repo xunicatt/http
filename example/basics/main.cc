@@ -6,24 +6,29 @@
 
 int main() {
   // set log level
+  // INFO is default
   http::loglevel(http::LogLevel::INFO);
   http::Router router;
 
   router.add("/", http::Method::GET, [](const http::Request& req) {
-    return http::Response("Hello, World!");
+    return http::Response("Hello, World! using GET");
+  });
+
+  router.add("/", http::Method::POST, [](const http::Request& req) {
+    return http::Response("Hello, World! using POST");
   });
 
   // routes with pattern matching using regex
-  router.add("/user/.+$", http::Method::GET, [](const http::Request& req) {
+  router.add_regex("/user/.+$", http::Method::GET, [](const http::Request& req) {
     // get the last segment in the url
     // /user/..../<username>
     const auto username = req.segments().back();
     return http::Response(std::format("welcome back {}", username));
   });
 
-  router.add("/id/[0-9]", http::Method::GET, [](const http::Request& req) {
+  router.add_regex("/id/[0-9]", http::Method::GET, [](const http::Request& req) {
     // get the last segment in the url
-    // /id/..../<id>
+    // /id/<id>
     const auto& id = std::stoi(req.segments().back());
     return http::Response(std::format("user id: {}", id));
   });

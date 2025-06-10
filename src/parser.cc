@@ -128,6 +128,8 @@ std::expected<Node, std::string> Parser::array() {
     return array;
   }
 
+  // BUG: array inside an array cause parsing
+  // error for some reason. will be fixed in upcoming updates
   while(token != Token::LSQR) {
     const auto& node = parse(false);
     if(!node.has_value()) return node;

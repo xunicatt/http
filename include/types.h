@@ -5,7 +5,7 @@
 #include <string>
 #include <map>
 #include <vector>
-#include <variant>
+#include <regex>
 
 #include "status.h"
 #include "methods.h"
@@ -17,6 +17,11 @@ struct SignalHandler {
 };
 
 using Header = std::map<std::string, std::string>;
+
+struct RegexWrapper {
+  std::regex regex;
+  std::string string;
+};
 
 struct Request {
   Method method;
@@ -50,6 +55,8 @@ private:
 }
 
 #ifdef HTTP_EXPERIMENTAL_MODULES
+
+#include <variant>
 
 namespace json {
 class Node;

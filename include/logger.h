@@ -5,10 +5,10 @@
 
 namespace http {
 enum LogLevel {
-  NONE,
   DEBUG,
   WARNING,
   INFO,
+  NONE,
 };
 
 void loglevel(const LogLevel&);

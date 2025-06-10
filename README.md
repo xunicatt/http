@@ -26,11 +26,11 @@ router.add(
 );
 
 // with regex
-router.add(
+router.add_regex(
   "/user/.+$",
   http::Method::GET,
   [](const http::Request& req) {
-    // get the last token in url path /user/<name>
+    // get the last token in url path /user/.../<name>
     const auto username = req.segments().back();
     return http::Response(std::format("Hi {}", username));
   }
@@ -55,7 +55,6 @@ router.add(
 ## Request & Response
 ### Represents an HTTP request (http::Request):
 - Method
-
 - URL
 - URL parameters
 - Headers

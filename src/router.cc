@@ -4,7 +4,6 @@
 #include <cstdio>
 #include <format>
 #include <optional>
-#include <print>
 #include <regex>
 #include <sstream>
 #include <string>
@@ -47,7 +46,33 @@ static const std::map<std::string, http::Method> methods = {
 
 namespace http {
 void Router::add(const std::string& url, const Method& method, const RouteFunc& func) {
-  routes[url] = RouteHandler{.method = method, .func = func};
+  if(!static_routes.contains(url)) {
+    static_routes[url] = {{ method, func }};
+    return;
+  }
+
+  auto& method_table = static_routes.at(url);
+  method_table[method] = func;
+}
+
+void Router::add_regex(const std::string& url, const Method& method, const RouteFunc& func) {
+  const auto& res = std::find_if(
+    regex_routes.begin(),
+    regex_routes.end(),
+    [&url](const std::pair<RegexWrapper, RouteMethodTable>& item) {
+      return item.first.string == url;
+    }
+  );
+
+  if(res == regex_routes.end()) {
+    regex_routes.emplace_back(
+      RegexWrapper{ std::regex{url}, url },
+      RouteMethodTable{{ method, func }}
+    );
+    return;
+  }
+  
+  res->second[method] = func;
 }
 
 std::string Router::handle(const int& fd) const {
@@ -63,40 +88,43 @@ std::string Router::handle(const int& fd) const {
     req.url
   ));
 
-  /* I know its inefficient to itterate over all routes */
-  RouteHandler rh;
+  if(static_routes.contains(req.url)) {
+    const auto& method_table = static_routes.at(req.url);
+    if(method_table.contains(req.method)) {
+      const auto& func = method_table.at(req.method);
+      return func(req).to_string();
+    }
+  }
+
   const auto& res = std::find_if(
-    routes.begin(),
-    routes.end(),
-    [req](const std::pair<std::string, RouteHandler>& kv) {
-      const std::regex pattern(kv.first);
-      return std::regex_match(req.url, pattern);
+    regex_routes.begin(),
+    regex_routes.end(),
+    [req](const std::pair<RegexWrapper, RouteMethodTable>& item) {
+      if(std::regex_match(req.url, item.first.regex)) {
+        return item.second.contains(req.method);
+      }
+
+      return false;
     }
   );
 
-  if(res == routes.end()) {
-    warning(std::format("url '{}' not found", req.url));
-    return Response(HttpStatusCode::NotFound).to_string();
-  }
-
-  rh = res->second;
-
-  if(rh.method != req.method) {
+  if(res == regex_routes.end()) {
     warning(std::format(
-      "expected method '{}' on url '{}' but got '{}'",
-      to_string(rh.method),
+      "url '{}' with method '{}' not found",
       req.url,
       to_string(req.method)
     ));
-    return Response(HttpStatusCode::MethodNotAllowed).to_string();
+    return Response(HttpStatusCode::NotFound).to_string();
   }
 
-  return rh.func(req).to_string();
+  const auto& method_table = res->second;
+  const auto& func = method_table.at(req.method);
+  return func(req).to_string();
 }
 }
 
 std::optional<http::Request> parse(const int& fd) {
-  /* [TODO] error handling for length = 0 or bad request */
+  /* TODO: error handling for length = 0 or bad request */
   http::debug("parsing request line");
   const std::string request_line = readline(fd);
   std::istringstream requst_line_stream(request_line);
