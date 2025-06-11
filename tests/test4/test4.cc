@@ -3,7 +3,7 @@
 
 int main() {
   http::Router router;
-  router.add_regex("/user", http::Method::POST, [](const http::Request& req) {
+  router.add("/user", http::Method::POST, [](const http::Request& req) {
     if(!req.params.contains("username")) {
       return http::Response(http::HttpStatusCode::BadRequest);
     }
