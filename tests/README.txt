@@ -24,7 +24,9 @@ This script tests the functionality of the library as a single unit.
 + To clean executables, run: rm *.out
 
 -- How to Run?
-+ python test.py
+> python test.py
+        or
+> python test.py test<n1> test<n2> ... 
 
 -- Notes:
 + Make sure curl.txt and ans.txt have the same number of lines.

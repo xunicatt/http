@@ -1,4 +1,5 @@
 import os
+import sys
 import signal
 import subprocess
 
@@ -6,6 +7,8 @@ lib = "http"
 paths = [
     "test1",
     "test2",
+    "test3",
+    "test4",
 ]
 
 def moduleflags() -> tuple[str, str, str]:
@@ -96,7 +99,7 @@ def test(path: str, incdir: str, libdir: str, libname: str):
     
     os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
     proc.wait()
-    print(f"[INFO] killing exe: {path}.out")
+    print(f"[INFO] killed exe: {path}.out")
 
     expected = answers(path)
     if len(expected) != len(got):
@@ -116,7 +119,12 @@ def test(path: str, incdir: str, libdir: str, libname: str):
 
 incdir, libdir, libname = moduleflags()
 
-for path in paths:
-    test(path, incdir, libdir, libname)
+args = sys.argv
+if len(sys.argv) > 1:
+    for arg in sys.argv[1:]:
+        test(arg, incdir, libdir, libname)
+else:
+    for path in paths:
+        test(path, incdir, libdir, libname)
 
 print("[INFO] All test passed")
