@@ -33,7 +33,7 @@ if not meson.is_subproject()
     description: project_description,
     version: meson.project_version(),
     libraries: http,
-    subdirs: 'include',
+    subdirs: meson.project_name(),
     install_dir: get_option('libdir') / 'pkgconfig',
   )
 
