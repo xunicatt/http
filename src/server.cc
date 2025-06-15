@@ -1,4 +1,6 @@
 #include <server.h>
+#include <logger.h>
+#include <router.h>
 #include <chrono>
 #include <format>
 #include <functional>
@@ -9,16 +11,12 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <print>
 #include <stdlib.h>
 #include <thread>
 #include <unistd.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
-
-#include <logger.h>
-#include <router.h>
 
 static http::SignalHandler signal_handler { .close_intp = false };
 static void signal_handler_func(int);

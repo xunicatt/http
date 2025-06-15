@@ -6,7 +6,7 @@
 
 int main() {
   // set log level
-  // INFO is default
+  // LogLevel::INFO is default
   http::loglevel(http::LogLevel::INFO);
   http::Router router;
 

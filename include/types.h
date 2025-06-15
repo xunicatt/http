@@ -3,9 +3,10 @@
 
 #include <mutex>
 #include <string>
-#include <map>
+#include <unordered_map>
 #include <vector>
 #include <regex>
+#include <variant>
 
 #include "status.h"
 #include "methods.h"
@@ -52,11 +53,6 @@ private:
   HttpStatusCode code;
   Header header;
 };
-}
-
-#ifdef HTTP_EXPERIMENTAL_MODULES
-
-#include <variant>
 
 namespace json {
 class Node;
@@ -72,8 +68,9 @@ enum class NodeType {
 [[nodiscard]]
 std::string to_string(const NodeType&);
 
+// TODO: integer should be handled using int64_t or uint64_t eventually
 using Array = std::vector<Node>;
-using Object = std::map<std::string, Node>;
+using Object = std::unordered_map<std::string, Node>;
 using Data = std::variant<
   int,
   double,
@@ -112,7 +109,7 @@ private:
   Data data;
   NodeType _type;
 };
-}
-#endif
+} // json namespace end
+} // http namespace end
 
 #endif

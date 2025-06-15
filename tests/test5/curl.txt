@@ -1,0 +1,3 @@
+localhost:8080/get-otp?name=Luke
+-X POST localhost:8080/validate-otp -d {"name":"Luke","otp":456123}
+-X POST localhost:8080/validate-otp -d {"name":"Luke","otp":123456}

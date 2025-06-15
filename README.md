@@ -10,6 +10,7 @@ http is a lightweight, multi-threaded HTTP library written in C++, designed for 
 - Status Codes: Complete enumeration of HTTP status codes with utilities.
 - Logging: Customizable logging with support for debug, info, warning, and error levels.
 - Server Control: Easily start and configure an HTTP server with port and address bindings.
+- Json: Builtin json moudle allows easy encoding and decoding.
 
 ## Routing
 `http::Router` allows `http::Server` to handle multiple routes and also supports regex pattern matching to resolve them.
@@ -157,6 +158,9 @@ ninja
 ./example
 ```
 
+## Modules:
+- json (stable): available directly by using "http::json" namespace
+
 ## Experimental Modules
 > [!WARNING]
 > EXPERIMENTAL MODULES ARE NOT READY FOR GENERAL USE. THESE MODULES MAY HAVE INCOMPLETE FEATURES AND ARE SUBJECT TO CHANGE OR BREAK AT ANY TIME.
@@ -165,9 +169,6 @@ To use experimental modules from 'http' in a meson subproject, we have to enable
 ```bash
 meson setup build -Dhttp:cpp_args="-DHTTP_EXPERIMENTAL_MODULES" -Dcpp_args="-DHTTP_EXPERIMENTAL_MODULES"
 ```
-
-### Modules:
-- json
 
 ## Docs
 Checkout `example/` directory for project integration and example.

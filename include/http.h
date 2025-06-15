@@ -7,13 +7,10 @@
 #include "types.h"
 #include "router.h"
 #include "server.h"
-
-#ifdef HTTP_EXPERIMENTAL_MODULES
-  #include "json.h"
-#endif
+#include "json.h"
 
 #define __HTTP_VERSION_MAJ__ 1
-#define __HTTP_VERSION_MIN__ 1
+#define __HTTP_VERSION_MIN__ 2
 #define __HTTP_VERSION_PTC__ 0
 
 namespace http {

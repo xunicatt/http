@@ -1,5 +1,5 @@
 project(
-  'basics',
+  'json_with_server',
   'cpp',
   default_options: [
     'cpp_std=c++23',
@@ -12,5 +12,7 @@ http_dep = dependency('http', required: true)
 executable(
   meson.project_name(),
   'main.cc',
-  dependencies: [http_dep],
+  dependencies: [
+    http_dep,
+  ],
 )

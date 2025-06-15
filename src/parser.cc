@@ -1,9 +1,7 @@
 #include <parser.h>
-
-#ifdef HTTP_EXPERIMENTAL_MODULES
-
 #include <map>
-#include <print>
+
+namespace json = http::json;
 
 static const std::map<char, json::Token> token_table = {
   {'{', json::Token::LCUR},
@@ -14,6 +12,10 @@ static const std::map<char, json::Token> token_table = {
   {',', json::Token::COMA},
 };
 
+static std::unexpected<std::string>
+fmterror(const std::string&, const json::ScannerLocation&);
+
+namespace http {
 namespace json {
 std::string to_string(const Token& t) {
   switch(t) {
@@ -34,44 +36,59 @@ std::string to_string(const Token& t) {
 }
 
 Scanner::Scanner(const std::string& data)
-: data(data), cursor(0) {}
+: data(data), loc({0}), lastloc({0}) {}
 
 bool Scanner::is_end() const {
-  return cursor >= data.length();
+  return loc.cursor >= data.length();
+}
+
+void Scanner::forward() {
+  if(!is_end() && loc.cursor++ &&  !is_end() && curr_char() == '\n') {
+    loc.row++;
+    loc.lnbeg = loc.cursor + 1;
+  }
 }
 
 bool Scanner::skip_whitespaces() {
-  while(!is_end() && std::isspace(data[cursor]))
-    cursor++;
+  while(!is_end() && std::isspace(curr_char()))
+    forward();
   return is_end();
 }
 
 char Scanner::curr_char() const {
   if(is_end()) return 0;
-  return data[cursor];
+  return data[loc.cursor];
+}
+
+const ScannerLocation& Scanner::location() const {
+  return lastloc;
 }
 
 Token Scanner::token() {
   if(is_end()) return Token::TEOF;
   if(skip_whitespaces()) return Token::TEOF;
 
+  lastloc = loc;
+
   if(token_table.contains(curr_char())) {
     Token t = token_table.at(curr_char());
-    cursor++;
+    forward();
     return t;
   }
 
   if(std::isdigit(curr_char())) {
-    size_t beg = cursor;
     bool is_float = false;
     while(!is_end() && (std::isdigit(curr_char()) || curr_char() == '.')) {
       if(!is_float && curr_char() == '.') {
         is_float = true;
       }
-      cursor++;
+      forward();
     }
 
-    const auto& number = data.substr(beg, cursor - beg);
+    const auto& number = data.substr(
+      lastloc.cursor,
+      loc.cursor - lastloc.cursor
+    );
     if(is_float) {
       value = std::stof(number);
       return Token::FLTL;
@@ -82,11 +99,13 @@ Token Scanner::token() {
   }
 
   if(std::isalpha(curr_char())) {
-    size_t beg = cursor;
     while(!is_end() && std::isalpha(curr_char()))
-      cursor++;
+      forward();
 
-    auto const& ident = data.substr(beg, cursor - beg);
+    auto const& ident = data.substr(
+      lastloc.cursor,
+      loc.cursor - lastloc.cursor
+    );
     if(ident != "true" && ident != "false")
       return Token::TERR;
 
@@ -94,15 +113,20 @@ Token Scanner::token() {
     return Token::BOLL;
   }
 
+  // TODO: error handling with \n in string
+  // BUG: above mentioned todo might cause some
+  // kind of weired undefined behavious
   if(curr_char() == '"') {
-    size_t beg = cursor;
-    cursor++;
+    forward();
     while(!is_end() && curr_char() != '"')
-      cursor++;
+      forward();
 
-    auto const& str = data.substr(beg + 1, cursor - beg - 1);
+    auto const& str = data.substr(
+      lastloc.cursor + 1,
+      loc.cursor - lastloc.cursor - 1
+    );
     value = str;
-    cursor++;
+    forward();
     return Token::STRL;
   }
 
@@ -118,7 +142,7 @@ std::expected<Node, std::string> Parser::literal() {
     case Token::FLTL: return sc.get<float>();
     case Token::BOLL: return sc.get<bool>();
     case Token::STRL: return sc.get<std::string>();
-    default: return std::unexpected("expected a literal");
+    default: return fmterror("expected a literal", sc.location());
   }
 }
 
@@ -128,15 +152,13 @@ std::expected<Node, std::string> Parser::array() {
     return array;
   }
 
-  // BUG: array inside an array cause parsing
-  // error for some reason. will be fixed in upcoming updates
-  while(token != Token::LSQR) {
+  while(true) {
     const auto& node = parse(false);
     if(!node.has_value()) return node;
-    array.push_back(node.value());
+    array.emplace_back(node.value());
     if(token = sc.token(); token == Token::RSQR) break;
     if(token != Token::COMA) {
-      return std::unexpected("expected ,");
+      return fmterror("expected ',' or ']'", sc.location());
     }
     token = sc.token();
   }
@@ -150,14 +172,14 @@ std::expected<Node, std::string> Parser::object() {
     return object;
   }
 
-  while(token != Token::RCUR) {
+  while(true) {
     if(token != Token::STRL) {
-      return std::unexpected("expected 'string' literal");
+      return fmterror("expected 'string' literal", sc.location());
     }
 
     const std::string key = sc.get<std::string>();
     if(token = sc.token(); token != Token::COLN) {
-      return std::unexpected("expected ':'");
+      return fmterror("expected ':'", sc.location());
     }
 
     const auto& node = parse();
@@ -169,7 +191,7 @@ std::expected<Node, std::string> Parser::object() {
     }
 
     if(token != Token::COMA) {
-      return std::unexpected("expected ','");
+      return fmterror("expected ',' or '}'", sc.location());
     }
 
     token = sc.token();
@@ -193,6 +215,16 @@ std::expected<Node, std::string> Parser::parse(bool fetch) {
       return literal();
   }
 }
-}
+} // json namespace end
+} // http namespace end
 
-#endif
+std::unexpected<std::string>
+fmterror(const std::string& msg, const json::ScannerLocation& loc) {
+  return std::unexpected{
+    std::format(
+    "{}:{} {}",
+    loc.row + 1,
+    loc.cursor - loc.lnbeg + 1,
+    msg
+  )};
+}

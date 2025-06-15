@@ -1,13 +1,12 @@
 #ifndef __JSON_PARSER_H__
 #define __JSON_PARSER_H__
 
-#ifdef HTTP_EXPERIMENTAL_MODULES
-
 #include <string>
 #include <variant>
 
 #include "json.h"
 
+namespace http {
 namespace json {
 enum class Token {
   LCUR,
@@ -28,6 +27,12 @@ enum class Token {
 [[nodiscard]]
 std::string to_string(const Token&);
 
+struct ScannerLocation {
+  size_t cursor;
+  size_t row;
+  size_t lnbeg;
+};
+
 class Scanner {
 public:
   Scanner(const std::string&);
@@ -36,8 +41,11 @@ public:
   T& get();
   [[nodiscard]]
   Token token();
+  [[nodiscard]]
+  const ScannerLocation& location() const;
 
 private:
+  void forward();
   [[nodiscard]]
   bool is_end() const;
   [[nodiscard]]
@@ -47,7 +55,8 @@ private:
 
   std::variant<int, float, bool, std::string> value;
   const std::string& data;
-  size_t cursor;
+  ScannerLocation loc;
+  ScannerLocation lastloc;
 };
 
 template <typename T>
@@ -72,7 +81,7 @@ private:
   Scanner& sc;
   Token token;
 };
-}
+} // json namespace end
+} // http namespace end
 
-#endif
 #endif

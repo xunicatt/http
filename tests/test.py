@@ -1,3 +1,4 @@
+#!/usr/bin/python
 import os
 import sys
 import signal
@@ -9,6 +10,7 @@ paths = [
     "test2",
     "test3",
     "test4",
+    "test5",
 ]
 
 def moduleflags() -> tuple[str, str, str]:

@@ -1,14 +1,14 @@
 #include <json.h>
-
-#ifdef HTTP_EXPERIMENTAL_MODULES
-
 #include <parser.h>
 #include <format>
 #include <ranges>
 
+namespace json = http::json;
+
 [[nodiscard]]
 static std::string data_to_string(const json::Data&);
 
+namespace http {
 namespace json {
 Node::Node(const int& data)
 : data(data), _type(NodeType::Int) {}
@@ -56,9 +56,10 @@ std::expected<Node, std::string> decode(const std::string& data) {
   Parser parser(scanner);
   return parser.parse();
 }
-}
+} // json namespace end
+} // http namespace end
 
-std::string data_to_string(const json::Data& data) {
+std::string data_to_string(const http::json::Data& data) {
   switch(static_cast<json::NodeType>(data.index())) {
     case json::NodeType::Int:
       return std::to_string(std::get<int>(data));
@@ -99,5 +100,3 @@ std::string data_to_string(const json::Data& data) {
       return {};
   }
 }
-
-#endif

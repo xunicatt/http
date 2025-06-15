@@ -1,4 +1,7 @@
 #include <router.h>
+#include <logger.h>
+#include <status.h>
+#include <types.h>
 #include <algorithm>
 #include <cstddef>
 #include <cstdio>
@@ -11,10 +14,6 @@
 #include <sys/types.h>
 #include <utility>
 #include <unistd.h>
-
-#include <logger.h>
-#include <status.h>
-#include <types.h>
 
 #ifndef CLIENT_POLLING_TIMEOUT
   #define CLIENT_POLLING_TIMEOUT 500

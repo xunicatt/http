@@ -3,3 +3,4 @@
 + test2: Tests same route with multiple Methods
 + test3: Tests regex route
 + test4: Tests parameter passing using url with error handling
++ test5: Tests the basic operations of 'http::json'
