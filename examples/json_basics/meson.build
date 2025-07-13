@@ -12,7 +12,5 @@ http_dep = dependency('http', required: true)
 executable(
   meson.project_name(),
   'main.cc',
-  dependencies: [
-    http_dep,
-  ],
+  dependencies: [ http_dep ],
 )

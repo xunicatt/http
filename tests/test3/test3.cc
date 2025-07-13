@@ -1,9 +1,9 @@
 #include <cstring>
-#include <http/http.h>
+#include <http.h>
 
 int main() {
   http::Router router;
-  router.add_regex("/user/[0-9]", http::Method::GET, [](const http::Request& req) {
+  router.add_regex("/user/[0-9]", http::Method::Get, [](const http::Request& req) {
     const auto id = req.segments().back();
     return http::Response(std::format("User: {}", id));
   });

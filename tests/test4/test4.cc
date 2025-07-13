@@ -1,11 +1,11 @@
 #include <cstring>
-#include <http/http.h>
+#include <http.h>
 
 int main() {
   http::Router router;
-  router.add("/user", http::Method::POST, [](const http::Request& req) {
+  router.add("/user", http::Method::Post, [](const http::Request& req) {
     if(!req.params.contains("username")) {
-      return http::Response(http::HttpStatusCode::BadRequest);
+      return http::Response(http::StatusCode::BadRequest);
     }
 
     return http::Response(std::format("Hi! {}", req.params.at("username")));

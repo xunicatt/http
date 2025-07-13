@@ -4,7 +4,7 @@
 #include <string>
 
 namespace http {
-enum HttpStatusCode {
+enum StatusCode {
 	Invalid = -1,
 
 	Continue = 100,
@@ -12,7 +12,7 @@ enum HttpStatusCode {
 	Processing = 102,
 	EarlyHints = 103,
 
-	OK = 200,
+	Ok = 200,
 	Created = 201,
 	Accepted = 202,
 	NonAuthoritativeInformation = 203,
@@ -78,20 +78,20 @@ enum HttpStatusCode {
 };
 
 [[nodiscard]]
-std::string to_string(const HttpStatusCode&);
+std::string to_string(const StatusCode&);
 
 [[nodiscard]]
-inline bool is_informational(const HttpStatusCode&);
+inline bool is_informational(const StatusCode&);
 [[nodiscard]]
-inline bool is_successful(const HttpStatusCode&);
+inline bool is_successful(const StatusCode&);
 [[nodiscard]]
-inline bool is_redirection(const HttpStatusCode&);
+inline bool is_redirection(const StatusCode&);
 [[nodiscard]]
-inline bool is_client_error(const HttpStatusCode&);
+inline bool is_client_error(const StatusCode&);
 [[nodiscard]]
-inline bool is_server_error(const HttpStatusCode&);
+inline bool is_server_error(const StatusCode&);
 [[nodiscard]]
-inline bool is_error(const HttpStatusCode&);
+inline bool is_error(const StatusCode&);
 }
 
 #endif

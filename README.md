@@ -20,7 +20,7 @@ http is a lightweight, multi-threaded HTTP library written in C++, designed for 
 http::Router router;
 router.add(
   "/",
-  http::HttpMethod::GET,
+  http::Method::GET,
   [](const http::Request& req) {
     return http::Response("Hello, World!");
   }

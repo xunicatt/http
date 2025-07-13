@@ -4,11 +4,11 @@
 #include <string>
 
 namespace http {
-enum LogLevel {
-  DEBUG,
-  WARNING,
-  INFO,
-  NONE,
+enum class LogLevel {
+  Debug,
+  Warning,
+  Info,
+  None,
 };
 
 void loglevel(const LogLevel&);

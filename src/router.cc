@@ -37,10 +37,10 @@ static std::pair<std::string, std::string> parse_header_line(const std::string&)
 static std::string parse_body(const int&, const std::optional<size_t>&);
 
 static const std::map<std::string, http::Method> methods = {
-  {"GET", http::Method::GET},
-  {"POST", http::Method::POST},
-  {"PUT", http::Method::PUT},
-  {"DELETE", http::Method::DELETE},
+  { "GET", http::Method::Get },
+  { "POST", http::Method::Post },
+  { "PUT", http::Method::Put },
+  { "DELETE", http::Method::Delete },
 };
 
 namespace http {
@@ -70,14 +70,14 @@ void Router::add_regex(const std::string& url, const Method& method, const Route
     );
     return;
   }
-  
+
   res->second[method] = func;
 }
 
 std::string Router::handle(const int& fd) const {
   const std::optional<Request> req_opt = parse(fd);
   if(!req_opt.has_value()) {
-    return Response(HttpStatusCode::BadRequest).to_string();
+    return Response(StatusCode::BadRequest).to_string();
   }
 
   const Request& req = req_opt.value();
@@ -113,7 +113,7 @@ std::string Router::handle(const int& fd) const {
       req.url,
       to_string(req.method)
     ));
-    return Response(HttpStatusCode::NotFound).to_string();
+    return Response(StatusCode::NotFound).to_string();
   }
 
   const auto& method_table = res->second;

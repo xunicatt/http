@@ -38,19 +38,19 @@ struct Request {
 struct Response {
 public:
   Response(const std::string&);
-  Response(const HttpStatusCode&);
-  Response(const std::string&,const HttpStatusCode&);
+  Response(const StatusCode&);
+  Response(const std::string&,const StatusCode&);
 
   void append_header(const std::string&,const std::string&);
   void set_body(const std::string&);
-  void set_code(const HttpStatusCode&);
+  void set_code(const StatusCode&);
 
   [[nodiscard]]
   std::string to_string() const;
 
 private:
   std::string body;
-  HttpStatusCode code;
+  StatusCode code;
   Header header;
 };
 

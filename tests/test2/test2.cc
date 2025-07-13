@@ -1,13 +1,13 @@
 #include <cstring>
-#include <http/http.h>
+#include <http.h>
 
 int main() {
   http::Router router;
-  router.add("/", http::Method::GET, [](const http::Request&) {
+  router.add("/", http::Method::Get, [](const http::Request&) {
     return http::Response("Hello, World! using GET");
   });
 
-  router.add("/", http::Method::POST, [](const http::Request&) {
+  router.add("/", http::Method::Post, [](const http::Request&) {
     return http::Response("Hello, World! using POST");
   });
 

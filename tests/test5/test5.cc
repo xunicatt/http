@@ -2,7 +2,7 @@
 #include <cstring>
 
 static constexpr int generate_otp() {
-  // INFO> to validate the output using test
+  // INFO: to validate the output using test
   // the number has to be a static
   return 456123;
 }
@@ -11,9 +11,9 @@ static http::Response get_otp(const http::Request& req)  {
   namespace json = http::json;
 
   if(!req.params.contains("name")) {
-    return http::HttpStatusCode::BadRequest;
+    return http::StatusCode::BadRequest;
   }
-  
+
   json::Node root = json::Object {
     { "name", req.params.at("name") },
     { "otp", generate_otp() }
@@ -29,7 +29,7 @@ static http::Response validate_otp(const http::Request& req) {
   if(!res.has_value()) {
     return http::Response(
       res.error(),
-      http::HttpStatusCode::BadRequest
+      http::StatusCode::BadRequest
     );
   }
 
@@ -57,8 +57,8 @@ static http::Response validate_otp(const http::Request& req) {
 
 int main() {
   http::Router router;
-  router.add("/get-otp", http::Method::GET, get_otp);
-  router.add("/validate-otp", http::Method::POST, validate_otp);
+  router.add("/get-otp", http::Method::Get, get_otp);
+  router.add("/validate-otp", http::Method::Post, validate_otp);
 
   http::Server server(router);
 

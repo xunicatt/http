@@ -2,38 +2,38 @@
 #include <cerrno>
 #include <print>
 #include <cstring>
-#include <http/http.h>
+#include <http.h>
 
 int main() {
   // set log level
   // LogLevel::INFO is default
-  http::loglevel(http::LogLevel::INFO);
+  http::loglevel(http::LogLevel::Info);
   http::Router router;
 
-  router.add("/", http::Method::GET, [](const http::Request& req) {
+  router.add("/", http::Method::Get, [](const http::Request& req) {
     return http::Response("Hello, World! using GET");
   });
 
-  router.add("/", http::Method::POST, [](const http::Request& req) {
+  router.add("/", http::Method::Post, [](const http::Request& req) {
     return http::Response("Hello, World! using POST");
   });
 
   // routes with pattern matching using regex
-  router.add_regex("/user/.+$", http::Method::GET, [](const http::Request& req) {
+  router.add_regex("/user/.+$", http::Method::Get, [](const http::Request& req) {
     // get the last segment in the url
     // /user/..../<username>
     const auto username = req.segments().back();
     return http::Response(std::format("welcome back {}", username));
   });
 
-  router.add_regex("/id/[0-9]", http::Method::GET, [](const http::Request& req) {
+  router.add_regex("/id/[0-9]", http::Method::Get, [](const http::Request& req) {
     // get the last segment in the url
     // /id/<id>
     const auto& id = std::stoi(req.segments().back());
     return http::Response(std::format("user id: {}", id));
   });
 
-  router.add("/hello", http::Method::GET, [](const http::Request& req) {
+  router.add("/hello", http::Method::Get, [](const http::Request& req) {
     std::string response =
       std::format(
        "Hello! {}",
@@ -45,7 +45,7 @@ int main() {
     return http::Response(response);
   });
 
-  router.add("/body", http::Method::POST, [](const http::Request& req) {
+  router.add("/body", http::Method::Post, [](const http::Request& req) {
     // get the body
     return http::Response(req.body.length() == 0 ? "no body??" : req.body);
   });

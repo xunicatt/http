@@ -4,11 +4,11 @@
 #include <string>
 
 namespace http {
-enum Method {
-  GET,
-  POST,
-  PUT,
-  DELETE,
+enum class Method {
+  Get,
+  Post,
+  Put,
+  Delete,
 };
 
 [[nodiscard]]

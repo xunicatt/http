@@ -6,29 +6,29 @@ http::Response user(const http::Request& req) {
   namespace json = http::json;
 
   if(!req.header.contains("Content-Type")) {
-    return http::HttpStatusCode::BadRequest;
+    return http::StatusCode::BadRequest;
   }
 
   if(req.header.at("Content-Type") != "application/json") {
-    return http::HttpStatusCode::BadRequest;
+    return http::StatusCode::BadRequest;
   }
 
   const auto& decoded_json = json::decode(req.body);
   if(!decoded_json.has_value()) {
     return http::Response(
       decoded_json.error(),
-      http::HttpStatusCode::BadRequest
+      http::StatusCode::BadRequest
     );
   }
 
   const auto& data = decoded_json.value();
   const auto& obj = data.get<json::Object>();
   if(!obj.contains("name")) {
-    return http::HttpStatusCode::BadRequest;
+    return http::StatusCode::BadRequest;
   }
 
   if(obj.at("name").type() != json::NodeType::String) {
-    return http::HttpStatusCode::BadRequest;
+    return http::StatusCode::BadRequest;
   }
 
   const auto& name = obj.at("name").get<std::string>();
@@ -45,7 +45,7 @@ http::Response user(const http::Request& req) {
 
 int main() {
   http::Router router;
-  router.add("/user", http::GET, user);
+  router.add("/user", http::Method::Get, user);
 
   http::Server server(router);
   if(server.run() < 0) {

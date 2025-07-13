@@ -1,4 +1,3 @@
-#!/usr/bin/python
 import os
 import sys
 import signal
@@ -63,7 +62,7 @@ def curl(path: str) -> list[str]:
     file = f"{path}/curl.txt"
     fcurl = open(file, "r")
     res = []
-    
+
     for line in fcurl.read().splitlines():
         cmd = [ "curl" ]
         for args in line.split(' '):
@@ -98,7 +97,7 @@ def test(path: str, incdir: str, libdir: str, libname: str):
     compile(path, incdir, libdir, libname)
     proc = runexe(path)
     got = curl(path)
-    
+
     os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
     proc.wait()
     print(f"[INFO] killed exe: {path}.out")
@@ -111,7 +110,7 @@ def test(path: str, incdir: str, libdir: str, libname: str):
     i = 0
     while i < len(expected):
         if expected[i].rstrip() != got[i].rstrip():
-            print(f"[ERROR] test failed")
+            print("[ERROR] test failed")
             print(f"\texpected: {expected[i]}")
             print(f"\tgot: {got[i]}")
             exit(1)
