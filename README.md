@@ -20,7 +20,7 @@ http is a lightweight, multi-threaded HTTP library written in C++, designed for 
 http::Router router;
 router.add(
   "/",
-  http::Method::GET,
+  http::Method::Get,
   [](const http::Request& req) {
     return http::Response("Hello, World!");
   }
@@ -29,7 +29,7 @@ router.add(
 // with regex
 router.add_regex(
   "/user/.+$",
-  http::Method::GET,
+  http::Method::Get,
   [](const http::Request& req) {
     // get the last token in url path /user/.../<name>
     const auto username = req.segments().back();
@@ -41,7 +41,7 @@ router.add_regex(
 // uname=xunicatt
 router.add(
   "/user",
-  http::Method::GET,
+  http::Method::Get,
   [](const http::Request& req) {
     if(!req.params.contains("uname")) {
       return http::Response(http::HttpStatusCode::BadRequest);
@@ -52,20 +52,6 @@ router.add(
   }
 );
 ```
-
-## Request & Response
-### Represents an HTTP request (http::Request):
-- Method
-- URL
-- URL parameters
-- Headers
-- Segment parser for URL
-- Body
-
-### Represents an HTTP response (http::Response):
-- Body
-- Status code
-- Header
 
 ## Server
 `http::Server` accepts an `http::Router` to handle various routes and manages clients using multiple threads. It is responsible for setting up the socket and binding the address and port.
@@ -136,7 +122,7 @@ main.cc:
 
 int main() {
   http::Router router;
-  router.add("/", http::Method::GET, [](const http::Request& req){
+  router.add("/", http::Method::Get, [](const http::Request& req){
     return http::Response("Hello, World!");
   });
 
