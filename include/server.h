@@ -12,6 +12,10 @@ public:
   Server& port(const uint16_t&);
   Server& addrs(const std::string&);
   [[nodiscard]]
+  uint16_t port() const;
+  [[nodiscard]]
+  const std::string& addrs() const;
+  [[nodiscard]]
   int run();
 
 private:

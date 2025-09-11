@@ -43,6 +43,14 @@ Server& Server::addrs(const std::string& vaddrs) {
   return *this;
 }
 
+uint16_t Server::port() const {
+  return _port;
+}
+
+const std::string& Server::addrs() const {
+  return _addrs;
+}
+
 int Server::run() {
   int ret = 0;
   const int optval = 1;
