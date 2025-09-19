@@ -2,6 +2,7 @@ import os
 import sys
 import signal
 import subprocess
+import time
 
 lib = "http"
 paths = [
@@ -11,41 +12,39 @@ paths = [
     "test4",
     "test5",
 ]
+CXX = os.environ.get("CXX")
+WAIT = 1
 
-def moduleflags() -> tuple[str, str, str]:
+def moduleflags() -> list[str]:
     pkgconfig = subprocess.Popen(
         [ "pkg-config", lib, "--cflags", "--libs" ],
         stdout=subprocess.PIPE,
         stderr=subprocess.DEVNULL,
     )
     stdout, _ = pkgconfig.communicate()
-    data = stdout.decode('utf-8')
+    data = stdout.decode('utf-8').strip()
 
     if len(data) == 0 or pkgconfig.returncode != 0:
         print(f"[ERROR] failed to get pkg-config data for lib: {lib}")
         exit(1)
 
-    incdir, libdir, libname = data.split(' ')
-    libname = libname.rstrip()
-    print(f"[INFO] got module flags: {incdir} {libdir} {libname}")
-    return incdir, libdir, libname
+    flags = data.split()
+    print(f"[INFO] got module flags: {' '.join(flags)}")
+    return flags
 
-def compile(name: str, incdir: str, libdir: str, libname: str):
+def compile(name: str, flags: list[str]):
     file = f"{name}/{name}.cc"
     gcc = subprocess.Popen(
         [
-            "g++",
+            f"{CXX}",
             "-std=c++23",
             "-Wall",
             "-Wextra",
             "-Werror",
             "-o",
             f"{name}.out",
-            file,
-            incdir,
-            libdir,
-            libname,
-        ],
+            file
+        ] + flags,
         stderr=subprocess.PIPE,
         stdout=subprocess.DEVNULL,
     )
@@ -93,9 +92,10 @@ def answers(path: str) -> list[str]:
     print(f"[INFO] read answers from: {path}/ans.txt")
     return fans.read().splitlines()
 
-def test(path: str, incdir: str, libdir: str, libname: str):
-    compile(path, incdir, libdir, libname)
+def test(path: str, flags: list[str]):
+    compile(path, flags)
     proc = runexe(path)
+    time.sleep(WAIT) # wait for exe to startup
     got = curl(path)
 
     os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
@@ -118,14 +118,14 @@ def test(path: str, incdir: str, libdir: str, libname: str):
 
     print(f"[INFO] passed: {path}")
 
-incdir, libdir, libname = moduleflags()
+flags = moduleflags()
 
 args = sys.argv
 if len(sys.argv) > 1:
     for arg in sys.argv[1:]:
-        test(arg, incdir, libdir, libname)
+        test(arg, flags)
 else:
     for path in paths:
-        test(path, incdir, libdir, libname)
+        test(path, flags)
 
 print("[INFO] All test passed")

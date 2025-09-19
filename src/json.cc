@@ -1,7 +1,6 @@
 #include <json.h>
 #include <parser.h>
 #include <format>
-#include <ranges>
 
 namespace json = http::json;
 
@@ -76,7 +75,8 @@ std::string data_to_string(const http::json::Data& data) {
     case json::NodeType::Array: {
       std::string res = "[";
       auto const& arr = std::get<json::Array>(data);
-      for(const auto& [i, x]: arr | std::views::enumerate) {
+      for(size_t i = 0; i < arr.size(); i++) {
+        const auto& x = arr[i];
         res += data_to_string(x.get());
         if(static_cast<size_t>(i) < arr.size() - 1) res += ", ";
       }

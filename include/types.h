@@ -17,7 +17,7 @@ struct SignalHandler {
   bool close_intp;
 };
 
-using Header = std::map<std::string, std::string>;
+using Header = std::unordered_map<std::string, std::string>;
 
 struct RegexWrapper {
   std::regex regex;
@@ -27,7 +27,7 @@ struct RegexWrapper {
 struct Request {
   Method method;
   std::string url;
-  std::map<std::string, std::string> params;
+  std::unordered_map<std::string, std::string> params;
   Header header;
   std::string body;
 

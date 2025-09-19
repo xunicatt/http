@@ -8,6 +8,7 @@
 #include <format>
 #include <optional>
 #include <regex>
+#include <unordered_map>
 #include <sstream>
 #include <string>
 #include <sys/poll.h>
@@ -23,7 +24,7 @@
   #define CLIENT_READ_BUFFER_SIZE 512
 #endif
 
-using ParsedURL = std::pair<std::string, std::map<std::string, std::string>>;
+using ParsedURL = std::pair<std::string, std::unordered_map<std::string, std::string>>;
 
 [[nodiscard]]
 static std::string readline(const int&);
@@ -36,7 +37,7 @@ static std::pair<std::string, std::string> parse_header_line(const std::string&)
 [[nodiscard]]
 static std::string parse_body(const int&, const std::optional<size_t>&);
 
-static const std::map<std::string, http::Method> methods = {
+static const std::unordered_map<std::string, http::Method> methods = {
   { "GET", http::Method::Get },
   { "POST", http::Method::Post },
   { "PUT", http::Method::Put },
@@ -170,7 +171,7 @@ ParsedURL parse_url(const std::string& url) {
   }
 
   const std::string str = url.substr(pos + 1);
-  std::map<std::string, std::string> params;
+  std::unordered_map<std::string, std::string> params;
   std::string key, value;
   bool setval = false;
 
