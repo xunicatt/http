@@ -55,8 +55,8 @@ private:
 
   std::variant<int, float, bool, std::string> value;
   const std::string& data;
-  ScannerLocation loc;
-  ScannerLocation lastloc;
+  ScannerLocation    loc;
+  ScannerLocation    lastloc;
 };
 
 template <typename T>
@@ -79,7 +79,7 @@ private:
   std::expected<Node, std::string> literal();
 
   Scanner& sc;
-  Token token;
+  Token    token;
 };
 } // json namespace end
 } // http namespace end

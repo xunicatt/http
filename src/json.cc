@@ -52,7 +52,7 @@ std::string encode(const Node& node) {
 
 std::expected<Node, std::string> decode(const std::string& data) {
   Scanner scanner(data);
-  Parser parser(scanner);
+  Parser  parser(scanner);
   return parser.parse();
 }
 } // json namespace end

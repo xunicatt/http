@@ -1,7 +1,7 @@
 project(
   'http',
   'cpp',
-  version: '1.3.3',
+  version: '1.3.4',
   default_options: [
     'cpp_std=c++23',
     'cpp_flags=-Wall -Werror -Wextra',

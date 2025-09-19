@@ -10,19 +10,19 @@ namespace http {
 namespace json {
 std::string to_string(const Token& t) {
   switch(t) {
-    case Token::LeftBrace: return "{";
-    case Token::RightBrace: return "}";
-    case Token::LeftBracket: return "[";
+    case Token::LeftBrace:    return "{";
+    case Token::RightBrace:   return "}";
+    case Token::LeftBracket:  return "[";
     case Token::RightBracket: return "]";
-    case Token::Colon: return ":";
-    case Token::Comma: return ",";
-    case Token::Int: return "int";
-    case Token::Float: return "float";
-    case Token::Bool: return "bool";
-    case Token::String: return "string";
-    case Token::Invalid: return "invalid";
-    case Token::EndOfFile: return "end of fike";
-    default: return {};
+    case Token::Colon:        return ":";
+    case Token::Comma:        return ",";
+    case Token::Int:          return "int";
+    case Token::Float:        return "float";
+    case Token::Bool:         return "bool";
+    case Token::String:       return "string";
+    case Token::Invalid:      return "invalid";
+    case Token::EndOfFile:    return "end of fike";
+    default:                  return {};
   }
 }
 
@@ -150,11 +150,11 @@ Parser::Parser(Scanner& sc)
 
 std::expected<Node, std::string> Parser::literal() {
   switch(token) {
-    case Token::Int: return sc.get<int>();
-    case Token::Float: return sc.get<float>();
-    case Token::Bool: return sc.get<bool>();
+    case Token::Int:    return sc.get<int>();
+    case Token::Float:  return sc.get<float>();
+    case Token::Bool:   return sc.get<bool>();
     case Token::String: return sc.get<std::string>();
-    default: return fmterror("expected a literal", sc.location());
+    default:            return fmterror("expected a literal", sc.location());
   }
 }
 

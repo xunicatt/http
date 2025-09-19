@@ -26,14 +26,19 @@
 
 using ParsedURL = std::pair<std::string, std::unordered_map<std::string, std::string>>;
 
+/* reads one line from client fd at a time */
 [[nodiscard]]
 static std::string readline(const int&);
+/* parses the http request */
 [[nodiscard]]
 static std::optional<http::Request> parse(const int&);
+/* parses only the http url */
 [[nodiscard]]
 static ParsedURL parse_url(const std::string&);
+/* parses single header line */
 [[nodiscard]]
 static std::pair<std::string, std::string> parse_header_line(const std::string&);
+/* parses entire http body */
 [[nodiscard]]
 static std::string parse_body(const int&, const std::optional<size_t>&);
 
@@ -257,8 +262,8 @@ std::string parse_body(const int& fd, const std::optional<size_t>& vlen) {
     return body;
   }
 
-  constexpr const size_t size = CLIENT_READ_BUFFER_SIZE;
-  char buffer[size] = {0};
+  static constexpr const size_t size = CLIENT_READ_BUFFER_SIZE;
+  static char buffer[size] = {0};
   std::string body;
 
   pollfd fds[1] = {
