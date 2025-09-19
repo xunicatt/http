@@ -1,17 +1,7 @@
 #include <parser.h>
-#include <map>
 #include <format>
 
 namespace json = http::json;
-
-static const std::map<char, json::Token> token_table = {
-  {'{', json::Token::LCUR},
-  {'}', json::Token::RCUR},
-  {'[', json::Token::LSQR},
-  {']', json::Token::RSQR},
-  {':', json::Token::COLN},
-  {',', json::Token::COMA},
-};
 
 static std::unexpected<std::string>
 fmterror(const std::string&, const json::ScannerLocation&);
@@ -20,18 +10,18 @@ namespace http {
 namespace json {
 std::string to_string(const Token& t) {
   switch(t) {
-    case Token::LCUR: return "{";
-    case Token::RCUR: return "}";
-    case Token::LSQR: return "[";
-    case Token::RSQR: return "]";
-    case Token::COLN: return ":";
-    case Token::COMA: return ",";
-    case Token::INTL: return "int";
-    case Token::FLTL: return "float";
-    case Token::BOLL: return "bool";
-    case Token::STRL: return "string";
-    case Token::TERR: return "error";
-    case Token::TEOF: return "eof";
+    case Token::LeftBrace: return "{";
+    case Token::RightBrace: return "}";
+    case Token::LeftBracket: return "[";
+    case Token::RightBracket: return "]";
+    case Token::Colon: return ":";
+    case Token::Comma: return ",";
+    case Token::Int: return "int";
+    case Token::Float: return "float";
+    case Token::Bool: return "bool";
+    case Token::String: return "string";
+    case Token::Invalid: return "invalid";
+    case Token::EndOfFile: return "end of fike";
     default: return {};
   }
 }
@@ -66,13 +56,34 @@ const ScannerLocation& Scanner::location() const {
 }
 
 Token Scanner::token() {
-  if(is_end()) return Token::TEOF;
-  if(skip_whitespaces()) return Token::TEOF;
+  if(is_end()) return Token::EndOfFile;
+  if(skip_whitespaces()) return Token::EndOfFile;
 
   lastloc = loc;
 
-  if(token_table.contains(curr_char())) {
-    Token t = token_table.at(curr_char());
+  Token t = Token::None;
+  switch (curr_char()) {
+    case '{': 
+      t = Token::LeftBrace;
+      break;
+    case '}': 
+      t = Token::RightBrace;
+      break;
+    case '[': 
+      t = Token::LeftBracket;
+      break;
+    case ']': 
+      t = Token::RightBracket;
+      break;
+    case ':': 
+      t = Token::Colon;
+    break;
+    case ',': 
+      t = Token::Comma;
+      break;
+  }
+
+  if (t != Token::None) {
     forward();
     return t;
   }
@@ -92,11 +103,11 @@ Token Scanner::token() {
     );
     if(is_float) {
       value = std::stof(number);
-      return Token::FLTL;
+      return Token::Float;
     }
 
     value = std::stoi(number);
-    return Token::INTL;
+    return Token::Int;
   }
 
   if(std::isalpha(curr_char())) {
@@ -108,10 +119,10 @@ Token Scanner::token() {
       loc.cursor - lastloc.cursor
     );
     if(ident != "true" && ident != "false")
-      return Token::TERR;
+      return Token::Invalid;
 
     value = ident == "true";
-    return Token::BOLL;
+    return Token::Bool;
   }
 
   // TODO: error handling with \n in string
@@ -128,10 +139,10 @@ Token Scanner::token() {
     );
     value = str;
     forward();
-    return Token::STRL;
+    return Token::String;
   }
 
-  return Token::TERR;
+  return Token::Invalid;
 }
 
 Parser::Parser(Scanner& sc)
@@ -139,17 +150,17 @@ Parser::Parser(Scanner& sc)
 
 std::expected<Node, std::string> Parser::literal() {
   switch(token) {
-    case Token::INTL: return sc.get<int>();
-    case Token::FLTL: return sc.get<float>();
-    case Token::BOLL: return sc.get<bool>();
-    case Token::STRL: return sc.get<std::string>();
+    case Token::Int: return sc.get<int>();
+    case Token::Float: return sc.get<float>();
+    case Token::Bool: return sc.get<bool>();
+    case Token::String: return sc.get<std::string>();
     default: return fmterror("expected a literal", sc.location());
   }
 }
 
 std::expected<Node, std::string> Parser::array() {
   Array array;
-  if(token = sc.token(); token == Token::RSQR) {
+  if(token = sc.token(); token == Token::RightBracket) {
     return array;
   }
 
@@ -157,8 +168,8 @@ std::expected<Node, std::string> Parser::array() {
     const auto& node = parse(false);
     if(!node.has_value()) return node;
     array.emplace_back(node.value());
-    if(token = sc.token(); token == Token::RSQR) break;
-    if(token != Token::COMA) {
+    if(token = sc.token(); token == Token::RightBracket) break;
+    if(token != Token::Comma) {
       return fmterror("expected ',' or ']'", sc.location());
     }
     token = sc.token();
@@ -169,17 +180,17 @@ std::expected<Node, std::string> Parser::array() {
 
 std::expected<Node, std::string> Parser::object() {
   Object object;
-  if(token = sc.token(); token == Token::RCUR) {
+  if(token = sc.token(); token == Token::RightBrace) {
     return object;
   }
 
   while(true) {
-    if(token != Token::STRL) {
+    if(token != Token::String) {
       return fmterror("expected 'string' literal", sc.location());
     }
 
     const std::string key = sc.get<std::string>();
-    if(token = sc.token(); token != Token::COLN) {
+    if(token = sc.token(); token != Token::Colon) {
       return fmterror("expected ':'", sc.location());
     }
 
@@ -187,11 +198,11 @@ std::expected<Node, std::string> Parser::object() {
     if(!node.has_value()) return node;
 
     object.insert({key, node.value()});
-    if(token = sc.token(); token == Token::RCUR) {
+    if(token = sc.token(); token == Token::RightBrace) {
       break;
     }
 
-    if(token != Token::COMA) {
+    if(token != Token::Comma) {
       return fmterror("expected ',' or '}'", sc.location());
     }
 
@@ -206,10 +217,10 @@ std::expected<Node, std::string> Parser::parse(bool fetch) {
     token = sc.token();
 
   switch(token) {
-    case Token::LCUR:
+    case Token::LeftBrace:
       return object();
 
-    case Token::LSQR:
+    case Token::LeftBracket:
       return array();
 
     default:

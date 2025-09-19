@@ -9,19 +9,19 @@
 namespace http {
 namespace json {
 enum class Token {
-  LCUR,
-  RCUR,
-  LSQR,
-  RSQR,
-  COLN,
-  COMA,
-  INTL,
-  FLTL,
-  BOLL,
-  STRL,
-  TEOF,
-  NONE,
-  TERR,
+  None,
+  EndOfFile,
+  Invalid,
+  Int,
+  Float,
+  Bool,
+  String,
+  Colon,
+  Comma,
+  LeftBrace,
+  RightBrace,
+  LeftBracket,
+  RightBracket,
 };
 
 [[nodiscard]]
