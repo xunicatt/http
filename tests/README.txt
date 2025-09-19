@@ -4,6 +4,8 @@ This script tests the functionality of the library as a single unit.
 
 ** To use this testing script YOU MUST install 'http' system-wide or in such a way
    that 'pkg-config' can locate it.
+** This test script looks up for environment variable 'CXX' to get the compiler.
+   YOU MUST export CXX in your environment, example for bash: "export CXX=g++".
 
 -- How to add a Test?
 + Each test directory should be named as: test<number>/
