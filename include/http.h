@@ -11,7 +11,7 @@
 
 #define __HTTP_VERSION_MAJ__ 1
 #define __HTTP_VERSION_MIN__ 3
-#define __HTTP_VERSION_PTC__ 4
+#define __HTTP_VERSION_PTC__ 5
 
 namespace http {
 [[nodiscard]]
