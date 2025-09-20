@@ -31,6 +31,8 @@ struct ScannerLocation {
   size_t cursor;
   size_t row;
   size_t lnbeg;
+
+  ScannerLocation();
 };
 
 class Scanner {

@@ -26,8 +26,11 @@ std::string to_string(const Token& t) {
   }
 }
 
+ScannerLocation::ScannerLocation()
+: cursor(0), row(0), lnbeg(0) {}
+
 Scanner::Scanner(const std::string& data)
-: data(data), loc({0}), lastloc({0}) {}
+: data(data) {}
 
 bool Scanner::is_end() const {
   return loc.cursor >= data.length();
