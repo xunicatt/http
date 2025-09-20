@@ -123,6 +123,24 @@ executable(
 )
 ```
 
+or
+
+CMakeLists.txt
+```cmake
+cmake_minimum_required(VERSION 3.14)
+project(example LANGUAGES CXX)
+
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+add_compile_options(-Wall -Wextra -Werror)
+
+add_subdirectory(subprojects/http)
+add_executable(example main.cc)
+target_link_libraries(example PRIVATE http)
+```
+
 main.cc:
 ```cpp
 #include <http.h>
