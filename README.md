@@ -72,10 +72,18 @@ if(server.port(8080).run() < 0) {
 - linux/macos
 
 ### System Wide:
+- meson
 ```bash
 meson setup build
 meson compile -C build
 meson install -C build
+```
+
+- cmake
+```bash
+mkdir build && cd $_
+cmake ..
+sudo make install
 ```
 
 ### As a Meson Project:
