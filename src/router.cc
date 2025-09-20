@@ -267,7 +267,11 @@ std::string parse_body(const int& fd, const std::optional<size_t>& vlen) {
   std::string body;
 
   pollfd fds[1] = {
-    (pollfd){.fd = fd, .events = POLLIN },
+    (pollfd){ 
+      .fd = fd,
+      .events = POLLIN,
+      .revents = {}
+    },
   };
 
   while(true) {

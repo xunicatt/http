@@ -19,7 +19,7 @@
 #include <arpa/inet.h>
 #include <sys/socket.h>
 
-static http::SignalHandler signal_handler { .close_intp = false };
+static http::SignalHandler signal_handler { .mut = {}, .close_intp = false };
 static void signal_handler_func(int);
 static void client_handler_func_multi_threaded(const http::Router&,const int);
 static void client_handler_func(const http::Router&,int&,sockaddr*,socklen_t*);
@@ -75,11 +75,13 @@ int Server::run() {
   http::debug("set socket options");
 
   addr = {
+    .sin_len = {},
     .sin_family = AF_INET,
     .sin_port = htons(_port),
     .sin_addr = {
       .s_addr = inet_addr(_addrs.c_str())
-    }
+    },
+    .sin_zero = {},
   };
 
   len = sizeof(addr);
