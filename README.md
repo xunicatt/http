@@ -163,10 +163,20 @@ int main() {
 ```
 
 Now to build and run it:
+
+meson:
 ```bash
 meson setup build
 cd build
 ninja
+./example
+```
+
+cmake:
+```bash
+mkdir build && cd $_
+cmake ..
+make
 ./example
 ```
 
