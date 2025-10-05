@@ -74,8 +74,10 @@ int Server::run() {
   }
   http::debug("set socket options");
 
-  addr = {
-    .sin_len = {},
+  addr = (sockaddr_in){
+    #if defined(__APPLE__) || defined(__MACH__)
+      .sin_len = {},
+    #endif
     .sin_family = AF_INET,
     .sin_port = htons(_port),
     .sin_addr = {
