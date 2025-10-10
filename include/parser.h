@@ -3,6 +3,7 @@
 
 #include <string>
 #include <variant>
+#include <cstdint>
 
 #include "json.h"
 
@@ -57,7 +58,7 @@ private:
   [[nodiscard]]
   char peek_char() const;
 
-  std::variant<int, float, bool, std::string> value;
+  std::variant<int64_t, double, bool, std::string> value;
   const std::string& data;
   ScannerLocation    loc;
   ScannerLocation    lastloc;

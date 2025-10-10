@@ -1,3 +1,4 @@
+#include <cstdint>
 #include <http.h>
 #include <cstring>
 
@@ -47,7 +48,7 @@ static http::Response validate_otp(const http::Request& req) {
     return http::BadRequest;
   }
 
-  const auto& otp = otp_node.get<int>();
+  const auto& otp = otp_node.get<int64_t>();
   if(otp != generate_otp()) {
     return json::encode(json::Object{{"msg", "invalid otp"}});
   }

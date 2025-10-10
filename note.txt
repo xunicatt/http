@@ -1,0 +1,9 @@
+v1.3.9
+
+updates:
+- support for larger integers (updated json::Scanner and json::Node to store integers in int64_t)
+- improved precision for floating point numbers in json (updated json::Scanner to parse and store FP number in double)
+- updated examples and tests (changes from std::get<int> to std::get<int64_t>
+
+added:
+- added warning for no exported CXX environment variable in tests/test.py script

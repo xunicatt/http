@@ -12,6 +12,9 @@ namespace json {
 Node::Node(const int& data)
 : data(data), _type(NodeType::Int) {}
 
+Node::Node(const int64_t& data)
+: data(data), _type(NodeType::Int) {}
+
 Node::Node(const double& data)
 : data(data), _type(NodeType::Float) {}
 
@@ -61,7 +64,7 @@ std::expected<Node, std::string> decode(const std::string& data) {
 std::string data_to_string(const http::json::Data& data) {
   switch(static_cast<json::NodeType>(data.index())) {
     case json::NodeType::Int:
-      return std::to_string(std::get<int>(data));
+      return std::to_string(std::get<int64_t>(data));
 
     case json::NodeType::Float:
       return std::to_string(std::get<double>(data));

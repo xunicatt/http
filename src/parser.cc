@@ -114,11 +114,11 @@ Token Scanner::token() {
       loc.cursor - lastloc.cursor
     );
     if(is_float) {
-      value = std::stof(number);
+      value = std::stod(number);
       return Token::Float;
     }
 
-    value = std::stoi(number);
+    value = std::stoll(number);
     return Token::Int;
   }
 
@@ -162,8 +162,8 @@ Parser::Parser(Scanner& sc)
 
 std::expected<Node, std::string> Parser::literal() {
   switch(token) {
-    case Token::Int:    return sc.get<int>();
-    case Token::Float:  return sc.get<float>();
+    case Token::Int:    return sc.get<int64_t>();
+    case Token::Float:  return sc.get<double>();
     case Token::Bool:   return sc.get<bool>();
     case Token::String: return sc.get<std::string>();
     default:            return fmterror("expected a literal", sc.location());

@@ -12,7 +12,12 @@ paths = [
     "test4",
     "test5",
 ]
+
 CXX = os.environ.get("CXX")
+if CXX is None:
+    print("ERROR: No CXX environment variable found! Please read tests/README.txt")
+    exit(1)
+
 WAIT = 1
 
 def moduleflags() -> list[str]:

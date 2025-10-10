@@ -7,6 +7,7 @@
 #include <vector>
 #include <regex>
 #include <variant>
+#include <cstdint>
 
 #include "status.h"
 #include "methods.h"
@@ -111,7 +112,7 @@ std::string to_string(const NodeType&);
 using Array = std::vector<Node>;
 using Object = std::unordered_map<std::string, Node>;
 using Data = std::variant<
-  int,
+  int64_t,
   double,
   bool,
   std::string,
@@ -121,7 +122,11 @@ using Data = std::variant<
 
 class Node {
 public:
+  // to keep backwards compatibility
+  // Node constructor with int is left out
+  // as an option
   Node(const int&);
+  Node(const int64_t&);
   Node(const double&);
   Node(const bool&);
   Node(const char*);
@@ -142,7 +147,7 @@ public:
   */
   [[nodiscard]]
   const Data& get() const;
-  
+
   /*
   * @brief Get the mutable Internal Data vairant of the Node.
   * @return Data.
