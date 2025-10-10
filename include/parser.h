@@ -54,6 +54,8 @@ private:
   bool skip_whitespaces();
   [[nodiscard]]
   char curr_char() const;
+  [[nodiscard]]
+  char peek_char() const;
 
   std::variant<int, float, bool, std::string> value;
   const std::string& data;

@@ -54,6 +54,11 @@ char Scanner::curr_char() const {
   return data[loc.cursor];
 }
 
+char Scanner::peek_char() const {
+  if(loc.cursor + 1 >= data.length()) return 0;
+  return data[loc.cursor + 1];
+}
+
 const ScannerLocation& Scanner::location() const {
   return lastloc;
 }
@@ -66,22 +71,22 @@ Token Scanner::token() {
 
   Token t = Token::None;
   switch (curr_char()) {
-    case '{': 
+    case '{':
       t = Token::LeftBrace;
       break;
-    case '}': 
+    case '}':
       t = Token::RightBrace;
       break;
-    case '[': 
+    case '[':
       t = Token::LeftBracket;
       break;
-    case ']': 
+    case ']':
       t = Token::RightBracket;
       break;
-    case ':': 
+    case ':':
       t = Token::Colon;
     break;
-    case ',': 
+    case ',':
       t = Token::Comma;
       break;
   }
@@ -91,8 +96,12 @@ Token Scanner::token() {
     return t;
   }
 
-  if(std::isdigit(curr_char())) {
+  if(std::isdigit(curr_char()) || (curr_char() == '-' && std::isdigit(peek_char()))) {
     bool is_float = false;
+    if (curr_char() == '-') {
+        forward();
+    }
+
     while(!is_end() && (std::isdigit(curr_char()) || curr_char() == '.')) {
       if(!is_float && curr_char() == '.') {
         is_float = true;

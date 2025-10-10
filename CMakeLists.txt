@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.14)
-project(http VERSION 1.3.7 LANGUAGES CXX)
+project(http VERSION 1.3.8 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -29,8 +29,8 @@ install(
 )
 
 install(
-  DIRECTORY include/ 
-  DESTINATION include/http 
+  DIRECTORY include/
+  DESTINATION include/http
   FILES_MATCHING PATTERN "*.h"
 )
 
