@@ -1,9 +1,16 @@
-v1.3.9
+v1.3.9+1
++ (plus) [number] versions are intermediate/rolling versions where new features and changes are introduced
 
-updates:
-- support for larger integers (updated json::Scanner and json::Node to store integers in int64_t)
-- improved precision for floating point numbers in json (updated json::Scanner to parse and store FP number in double)
-- updated examples and tests (changes from std::get<int> to std::get<int64_t>
+deprecated:
+- macros:
+  __HTTP_VERSION_MAJ__ -> http::ver::Major
+  __HTTP_VERSION_MIN__ -> http:ver::Minor
+  __HTTP_VERSION_PTC__ -> http::ver::Patch
 
-added:
-- added warning for no exported CXX environment variable in tests/test.py script
+- functions:
+  http::version -> http::ver::to_string
+
+known issue:
+- library when compiled with clang causes linking issue
+- tests might fail due to mismatch of order of keys, because of std::unordered_map 
+

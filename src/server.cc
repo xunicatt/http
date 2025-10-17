@@ -1,4 +1,4 @@
-#include "http.h"
+#include <http.h>
 #include <server.h>
 #include <logger.h>
 #include <router.h>
@@ -53,7 +53,7 @@ const std::string& Server::addrs() const {
 }
 
 int Server::run() {
-  info(std::format("libhttp version: {}", version()));
+  info(std::format("libhttp version: {}", http::ver::to_string()));
 
   int ret = 0;
   const int optval = 1;
