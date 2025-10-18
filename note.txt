@@ -1,12 +1,8 @@
-v1.3.9+2
+v1.3.9+3
 + (plus) [number] versions are intermediate/rolling versions where new features and changes are introduced
 
-fixes:
-- fixed a BUG in json parser which allowd new lines in a json string literal
-- typo in to_string function for Token
-
 changes:
-- minor improvement in the overall implementation of Json Scanner (Lexer) and error handling
+- minor code style and semantic changes and overall improvement
 
 known issue:
 - library when compiled with clang causes linking issue

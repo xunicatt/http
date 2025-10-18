@@ -51,7 +51,7 @@ static const std::unordered_map<std::string, http::Method> methods = {
 
 namespace http {
 void Router::add(const std::string& url, const Method& method, const RouteFunc& func) {
-  if(!static_routes.contains(url)) {
+  if (!static_routes.contains(url)) {
     static_routes[url] = {{ method, func }};
     return;
   }
@@ -69,7 +69,7 @@ void Router::add_regex(const std::string& url, const Method& method, const Route
     }
   );
 
-  if(res == regex_routes.end()) {
+  if (res == regex_routes.end()) {
     regex_routes.emplace_back(
       RegexWrapper{ std::regex{url}, url },
       RouteMethodTable{{ method, func }}
@@ -82,20 +82,20 @@ void Router::add_regex(const std::string& url, const Method& method, const Route
 
 std::string Router::handle(const int& fd) const {
   const std::optional<Request> req_opt = parse(fd);
-  if(!req_opt.has_value()) {
+  if (!req_opt) {
     return Response(StatusCode::BadRequest).to_string();
   }
 
-  const Request& req = req_opt.value();
+  const Request& req = *req_opt;
   info(std::format(
     "{} on {}",
     to_string(req.method),
     req.url
   ));
 
-  if(static_routes.contains(req.url)) {
+  if (static_routes.contains(req.url)) {
     const auto& method_table = static_routes.at(req.url);
-    if(method_table.contains(req.method)) {
+    if (method_table.contains(req.method)) {
       const auto& func = method_table.at(req.method);
       return func(req).to_string();
     }
@@ -105,7 +105,7 @@ std::string Router::handle(const int& fd) const {
     regex_routes.begin(),
     regex_routes.end(),
     [req](const std::pair<RegexWrapper, RouteMethodTable>& item) {
-      if(std::regex_match(req.url, item.first.regex)) {
+      if (std::regex_match(req.url, item.first.regex)) {
         return item.second.contains(req.method);
       }
 
@@ -113,7 +113,7 @@ std::string Router::handle(const int& fd) const {
     }
   );
 
-  if(res == regex_routes.end()) {
+  if (res == regex_routes.end()) {
     warning(std::format(
       "url '{}' with method '{}' not found",
       req.url,
@@ -140,17 +140,19 @@ std::optional<http::Request> parse(const int& fd) {
 
   http::debug("parsing headers");
   http::Header header;
-  while(true) {
+  while (true) {
     std::string header_line = readline(fd);
-    if(header_line == "\r" || header_line.empty()) break;
+    if (header_line == "\r" || header_line.empty()) {
+      break;
+    }
 
     const auto& res = parse_header_line(header_line);
-    if(res.first.length() != 0) {
+    if (res.first.length() != 0) {
       header.insert(res);
     }
   }
 
-  if(!methods.contains(method)) {
+  if (!methods.contains(method)) {
     return std::nullopt;
   }
 
@@ -171,7 +173,7 @@ std::optional<http::Request> parse(const int& fd) {
 ParsedURL parse_url(const std::string& url) {
   http::debug("parsing url");
   const size_t pos = url.find("?");
-  if(pos == std::string::npos) {
+  if (pos == std::string::npos) {
     return {url, {}};
   }
 
@@ -181,8 +183,8 @@ ParsedURL parse_url(const std::string& url) {
   bool setval = false;
 
   http::debug("parsing params");
-  for(size_t i = 0; i < str.length(); i++) {
-    switch(str[i]) {
+  for (size_t i = 0; i < str.length(); i++) {
+    switch (str[i]) {
       case '&': {
         params[key] = value;
         key.clear(); value.clear();
@@ -196,13 +198,17 @@ ParsedURL parse_url(const std::string& url) {
       }
 
       default: {
-        if(setval) value += str[i];
-        else key += str[i];
+        if (setval) {
+          value += str[i];
+        } else {
+          key += str[i];
+        }
       }
     }
 
-    if(i == str.length() - 1)
+    if (i == str.length() - 1) {
       params[key] = value;
+    }
   }
 
   return {
@@ -239,18 +245,18 @@ std::pair<std::string, std::string> parse_header_line(const std::string& line) {
   };
 
   const size_t pos = line.find(":");
-  if(pos == std::string::npos) {
+  if (pos == std::string::npos) {
     return {};
   }
 
-  return {trim(line.substr(0, pos)), trim(line.substr(pos + 1))};
+  return { trim(line.substr(0, pos)), trim(line.substr(pos + 1)) };
 }
 
 std::string parse_body(const int& fd, const std::optional<size_t>& vlen) {
   http::debug("parsing body");
-  if(vlen.has_value()) {
-    http::debug(std::format("got body length: {}", vlen.value()));
-    size_t len = vlen.value();
+  if (vlen) {
+    http::debug(std::format("got body length: {}", *vlen));
+    size_t len = *vlen;
     char* buffer = new char[len + 1];
 
     len = read(fd, buffer, len);
@@ -262,12 +268,12 @@ std::string parse_body(const int& fd, const std::optional<size_t>& vlen) {
     return body;
   }
 
-  static constexpr const size_t size = CLIENT_READ_BUFFER_SIZE;
-  static char buffer[size] = {0};
+  thread_local static constexpr const size_t size = CLIENT_READ_BUFFER_SIZE;
+  thread_local static char buffer[size] = {0};
   std::string body;
 
   pollfd fds[1] = {
-    (pollfd){ 
+    (pollfd){
       .fd = fd,
       .events = POLLIN,
       .revents = {}
@@ -276,10 +282,15 @@ std::string parse_body(const int& fd, const std::optional<size_t>& vlen) {
 
   while(true) {
     http::debug("waiting for read using poll()");
-    if(poll(fds, 1, CLIENT_POLLING_TIMEOUT) <= 0) break;
-    if(fds[0].revents & POLLIN) {
+    if (poll(fds, 1, CLIENT_POLLING_TIMEOUT) <= 0) {
+      break;
+    }
+
+    if (fds[0].revents & POLLIN) {
       ssize_t len = 0;
-      if(len = read(fd, buffer, size - 1); len <= 0) break;
+      if (len = read(fd, buffer, size - 1); len <= 0) {
+        break;
+      }
       buffer[len] = '\0';
       body += buffer;
     }
@@ -290,8 +301,10 @@ std::string parse_body(const int& fd, const std::optional<size_t>& vlen) {
 
 std::string readline(const int& fd) {
   std::string line; char ch;
-  while(read(fd, &ch, 1) > 0) {
-    if(ch == '\n') break;
+  while (read(fd, &ch, 1) > 0) {
+    if(ch == '\n') {
+      break;
+    }
     line += ch;
   }
   return line;

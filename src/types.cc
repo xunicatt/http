@@ -3,18 +3,22 @@
 #include <string>
 #include <sstream>
 
+#ifndef HTTP_VERSION
+  #define HTTP_VERSION "HTTP/1.1"
+#endif
+
 static void set_default_header_fields(http::Header&);
 [[nodiscard]]
 static std::string header_to_string(const http::Header&);
 
 namespace http {
 std::string to_string(const Method& m) {
-  switch(m) {
-    case Method::Get: return "GET";
-    case Method::Post: return "POST";
-    case Method::Put: return "PUT";
+  switch (m) {
+    case Method::Get:    return "GET";
+    case Method::Post:   return "POST";
+    case Method::Put:    return "PUT";
     case Method::Delete: return "DELETE";
-    default: return {};
+    default:             return {};
   }
 }
 
@@ -134,7 +138,7 @@ Response::Response(const std::string& body, const StatusCode& code)
 }
 
 void Response::append_header(const std::string& key, const std::string& value) {
-  header.insert({key, value});
+  header.insert({ key, value });
 }
 void Response::set_body(const std::string& vbody) {
   body = vbody;
@@ -147,7 +151,7 @@ void Response::set_code(const StatusCode& vcode) {
 
 std::string Response::to_string() const {
   return std::format(
-    "HTTP/1.1 {} {}\n{}\r\n{}",
+    HTTP_VERSION" {} {}\n{}\r\n{}",
     static_cast<int>(code),
     http::to_string(code),
     header_to_string(header),
@@ -175,7 +179,7 @@ void set_default_header_fields(http::Header& header) {
 
 std::string header_to_string(const http::Header& header) {
   std::string res;
-  for(const auto& [k, v]: header)
+  for (const auto& [k, v]: header)
     res += std::format("{}: {}\n", k, v);
   return res;
 }

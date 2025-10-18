@@ -62,7 +62,7 @@ std::expected<Node, std::string> decode(const std::string& data) {
 } // http namespace end
 
 std::string data_to_string(const http::json::Data& data) {
-  switch(static_cast<json::NodeType>(data.index())) {
+  switch (static_cast<json::NodeType>(data.index())) {
     case json::NodeType::Int:
       return std::to_string(std::get<int64_t>(data));
 
@@ -76,12 +76,13 @@ std::string data_to_string(const http::json::Data& data) {
       return std::format("\"{}\"", std::get<std::string>(data));
 
     case json::NodeType::Array: {
-      std::string res = "[";
-      auto const& arr = std::get<json::Array>(data);
-      for(size_t i = 0; i < arr.size(); i++) {
-        const auto& x = arr[i];
+      std::string res = "["; size_t i = 0;
+      const auto& arr = std::get<json::Array>(data);
+      for (const auto& x: arr) {
         res += data_to_string(x.get());
-        if(static_cast<size_t>(i) < arr.size() - 1) res += ", ";
+        if (i < arr.size() - 1) {
+          res += ", ";
+        }
       }
       res += "]";
       return res;
@@ -90,9 +91,11 @@ std::string data_to_string(const http::json::Data& data) {
     case json::NodeType::Object: {
       std::string res = "{"; size_t i = 0;
       const auto& obj = std::get<json::Object>(data);
-      for(auto const& [k, v]: obj) {
+      for (const auto& [k, v]: obj) {
         res += std::format("\"{}\": {}", k, data_to_string(v.get()));
-        if(i < obj.size() - 1) res += ", ";
+        if (i < obj.size() - 1) {
+          res += ", ";
+        }
         i++;
       }
       res += "}";

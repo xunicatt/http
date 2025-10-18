@@ -108,7 +108,6 @@ enum class NodeType {
 [[nodiscard]]
 std::string to_string(const NodeType&);
 
-// TODO: integer should be handled using int64_t or uint64_t eventually
 using Array = std::vector<Node>;
 using Object = std::unordered_map<std::string, Node>;
 using Data = std::variant<

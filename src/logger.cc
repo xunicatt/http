@@ -9,19 +9,19 @@ void loglevel(const LogLevel& vlevel) {
 }
 
 void info(const std::string& msg) {
-  if(level <= LogLevel::Info) {
+  if (level <= LogLevel::Info) {
     std::println("[INFO] {}", msg);
   }
 }
 
 void warning(const std::string& msg) {
-  if(level <= LogLevel::Warning) {
+  if (level <= LogLevel::Warning) {
     std::println("[WARN] {}", msg);
   }
 }
 
 void debug(const std::string& msg) {
-  if(level <= LogLevel::Debug) {
+  if (level <= LogLevel::Debug) {
     std::println("[DEBUG] {}", msg);
   }
 }

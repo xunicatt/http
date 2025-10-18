@@ -10,7 +10,7 @@ fmterror(const std::string&, const json::ScannerLocation&);
 namespace http {
 namespace json {
 std::string to_string(const Token& t) {
-  switch(t) {
+  switch (t) {
     case Token::LeftBrace:    return "{";
     case Token::RightBrace:   return "}";
     case Token::LeftBracket:  return "[";
@@ -38,25 +38,31 @@ bool Scanner::is_end() const {
 }
 
 void Scanner::forward() {
-  if(!is_end() && loc.cursor++ &&  !is_end() && curr_char() == '\n') {
+  if (!is_end() && loc.cursor++ &&
+        !is_end() && curr_char() == '\n') {
     loc.row++;
     loc.lnbeg = loc.cursor + 1;
   }
 }
 
 bool Scanner::skip_whitespaces() {
-  while(!is_end() && std::isspace(curr_char()))
+  while (!is_end() && std::isspace(curr_char())) {
     forward();
+  }
   return is_end();
 }
 
 char Scanner::curr_char() const {
-  if(is_end()) return 0;
+  if (is_end()) {
+    return 0;
+  }
   return data[loc.cursor];
 }
 
 char Scanner::peek_char() const {
-  if(loc.cursor + 1 >= data.length()) return 0;
+  if (loc.cursor + 1 >= data.length()) {
+    return 0;
+  }
   return data[loc.cursor + 1];
 }
 
@@ -65,8 +71,13 @@ const ScannerLocation& Scanner::location() const {
 }
 
 std::expected<Token, std::string> Scanner::token() {
-  if(is_end()) return Token::EndOfFile;
-  if(skip_whitespaces()) return Token::EndOfFile;
+  if (is_end()) {
+    return Token::EndOfFile;
+  }
+
+  if (skip_whitespaces()) {
+    return Token::EndOfFile;
+  }
 
   lastloc = loc;
 
@@ -97,14 +108,16 @@ std::expected<Token, std::string> Scanner::token() {
     return t;
   }
 
-  if(std::isdigit(curr_char()) || (curr_char() == '-' && std::isdigit(peek_char()))) {
+  if (std::isdigit(curr_char()) ||
+        (curr_char() == '-' && std::isdigit(peek_char()))) {
     bool is_float = false;
     if (curr_char() == '-') {
         forward();
     }
 
-    while(!is_end() && (std::isdigit(curr_char()) || curr_char() == '.')) {
-      if(!is_float && curr_char() == '.') {
+    while (!is_end() &&
+            (std::isdigit(curr_char()) || curr_char() == '.')) {
+      if (!is_float && curr_char() == '.') {
         is_float = true;
       }
       forward();
@@ -114,7 +127,7 @@ std::expected<Token, std::string> Scanner::token() {
       lastloc.cursor,
       loc.cursor - lastloc.cursor
     );
-    if(is_float) {
+    if (is_float) {
       value = std::stod(number);
       return Token::Float;
     }
@@ -123,29 +136,29 @@ std::expected<Token, std::string> Scanner::token() {
     return Token::Int;
   }
 
-  if(std::isalpha(curr_char())) {
-    while(!is_end() && std::isalpha(curr_char()))
+  if (std::isalpha(curr_char())) {
+    while (!is_end() && std::isalpha(curr_char())) {
       forward();
+    }
 
     auto const& ident = data.substr(
       lastloc.cursor,
       loc.cursor - lastloc.cursor
     );
-    if(ident != "true" && ident != "false")
+    if (ident != "true" && ident != "false") {
       return Token::Invalid;
+    }
 
     value = ident == "true";
     return Token::Bool;
   }
 
-  // TODO: error handling with \n in string
-  // BUG: above mentioned todo might cause some
-  // kind of weired undefined behavious
-  if(curr_char() == '"') {
+  // TODO: handling escape characters like \n \t in string
+  if (curr_char() == '"') {
     forward();
-    while(!is_end() && curr_char() != '"') {
+    while (!is_end() && curr_char() != '"') {
       if (curr_char() == '\n') {
-        return fmterror("unexpected end of string", lastloc);
+        return fmterror("unexpected end of string", location());
       }
       forward();
     }
@@ -166,7 +179,7 @@ Parser::Parser(Scanner& sc)
 : sc(sc) {}
 
 std::expected<Node, std::string> Parser::literal() {
-  switch(token) {
+  switch (token) {
     case Token::Int:    return sc.get<int64_t>();
     case Token::Float:  return sc.get<double>();
     case Token::Bool:   return sc.get<bool>();
@@ -184,27 +197,27 @@ std::expected<Node, std::string> Parser::array() {
   }
 
   this->token = *token;
-  if(*token == Token::RightBracket) {
+  if (*token == Token::RightBracket) {
     return array;
   }
 
-  while(true) {
+  while (true) {
     const auto& node = parse(false);
-    if(!node) {
+    if (!node) {
       return node;
     }
-    array.emplace_back(node.value());
+    array.emplace_back(*node);
 
     if (!(token = sc.token())) {
       return std::unexpected(token.error());
     }
 
     this->token = *token;
-    if(*token == Token::RightBracket) {
+    if (*token == Token::RightBracket) {
       break;
     }
 
-    if(*token != Token::Comma) {
+    if (*token != Token::Comma) {
       return fmterror("expected ',' or ']'", sc.location());
     }
 
@@ -225,12 +238,12 @@ std::expected<Node, std::string> Parser::object() {
   }
 
   this->token = *token;
-  if(*token == Token::RightBrace) {
+  if (*token == Token::RightBrace) {
     return object;
   }
 
-  while(true) {
-    if(*token != Token::String) {
+  while (true) {
+    if (*token != Token::String) {
       return fmterror("expected 'string' literal", sc.location());
     }
 
@@ -240,12 +253,12 @@ std::expected<Node, std::string> Parser::object() {
     }
 
     this->token = *token;
-    if(*token != Token::Colon) {
+    if (*token != Token::Colon) {
       return fmterror("expected ':'", sc.location());
     }
 
     const auto& node = parse();
-    if(!node) {
+    if (!node) {
       return node;
     }
 
@@ -256,11 +269,11 @@ std::expected<Node, std::string> Parser::object() {
     }
 
     this->token = *token;
-    if(*token == Token::RightBrace) {
+    if (*token == Token::RightBrace) {
       break;
     }
 
-    if(*token != Token::Comma) {
+    if (*token != Token::Comma) {
       return fmterror("expected ',' or '}'", sc.location());
     }
 
@@ -274,7 +287,7 @@ std::expected<Node, std::string> Parser::object() {
 }
 
 std::expected<Node, std::string> Parser::parse(bool fetch) {
-  if(fetch) {
+  if (fetch) {
     auto token = sc.token();
     if (!token) {
       return std::unexpected(token.error());
@@ -283,7 +296,7 @@ std::expected<Node, std::string> Parser::parse(bool fetch) {
   }
 
 
-  switch(token) {
+  switch (token) {
     case Token::LeftBrace:
       return object();
 

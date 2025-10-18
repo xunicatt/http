@@ -19,6 +19,10 @@
 #include <arpa/inet.h>
 #include <sys/socket.h>
 
+#ifndef CLIENT_MAX_QUEUE_SIZE
+  #define CLIENT_MAX_QUEUE_SIZE 10
+#endif
+
 static http::SignalHandler signal_handler { .mut = {}, .close_intp = false };
 static void signal_handler_func(int);
 static void client_handler_func_multi_threaded(const http::Router&,const int);
@@ -28,7 +32,7 @@ namespace http {
 Server::Server(const Router& router)
 : router(router), _port(8080), _addrs("0.0.0.0") {
   http::debug("registering signal interupt handler");
-  if(signal(SIGINT, signal_handler_func) == SIG_ERR) {
+  if (signal(SIGINT, signal_handler_func) == SIG_ERR) {
     perror(strerror(errno));
     exit(1);
   }
@@ -58,12 +62,12 @@ int Server::run() {
   int ret = 0;
   const int optval = 1;
 
-  if(_socket = socket(AF_INET, SOCK_STREAM, 0); _socket < 0) {
+  if (_socket = socket(AF_INET, SOCK_STREAM, 0); _socket < 0) {
     return _socket;
   }
   http::debug("created socket");
 
-  if(ret = setsockopt(
+  if (ret = setsockopt(
     _socket,
     SOL_SOCKET,
     SO_REUSEADDR,
@@ -88,12 +92,12 @@ int Server::run() {
 
   len = sizeof(addr);
 
-  if(ret = bind(_socket, (sockaddr*)&addr, len); ret < 0) {
+  if (ret = bind(_socket, (sockaddr*)&addr, len); ret < 0) {
     return ret;
   }
   http::debug("binded socket to an address");
 
-  if(ret = listen(_socket, 10); ret < 0) {
+  if (ret = listen(_socket, CLIENT_MAX_QUEUE_SIZE); ret < 0) {
     return ret;
   }
   http::debug("started listening on that address");
@@ -109,8 +113,8 @@ int Server::run() {
 
   info(std::format("started server on port: {}", _port));
 
-  while(true) {
-    {
+  while (true) {
+    { /* mutex is scoped to call unlock at the end of scope */
       std::lock_guard<std::mutex> guard(signal_handler.mut);
       if(signal_handler.close_intp) break;
     }
@@ -119,11 +123,11 @@ int Server::run() {
   }
 
   info("shutting down");
-  if(ret = shutdown(_socket, SHUT_RDWR); ret < 0) {
+  if (ret = shutdown(_socket, SHUT_RDWR); ret < 0) {
     return ret;
   }
 
-  if(ret = close(_socket); ret < 0) {
+  if (ret = close(_socket); ret < 0) {
     return ret;
   }
 
@@ -146,7 +150,7 @@ static void client_handler_func_multi_threaded(
   write(client, res.c_str(), res.length());
   http::debug("sent response to client");
 
-  if(close(client) < 0) {
+  if (close(client) < 0) {
     http::error(strerror(errno));
     return;
   }
@@ -161,12 +165,12 @@ static void client_handler_func(
   sockaddr* addr,
   socklen_t* len
 ) {
-  while(true) {
+  while (true) {
     int client = accept(sock, addr, len);
     http::debug("connected to a client");
 
-    if(client < 0) {
-      if(errno == EBADF || errno == EINVAL) {
+    if (client < 0) {
+      if (errno == EBADF || errno == EINVAL) {
         return;
       }
 
