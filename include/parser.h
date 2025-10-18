@@ -43,7 +43,7 @@ public:
   [[nodiscard]]
   T& get();
   [[nodiscard]]
-  Token token();
+  std::expected<Token, std::string> token();
   [[nodiscard]]
   const ScannerLocation& location() const;
 

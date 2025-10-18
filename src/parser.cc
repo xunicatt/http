@@ -1,3 +1,4 @@
+#include <expected>
 #include <parser.h>
 #include <format>
 
@@ -21,7 +22,7 @@ std::string to_string(const Token& t) {
     case Token::Bool:         return "bool";
     case Token::String:       return "string";
     case Token::Invalid:      return "invalid";
-    case Token::EndOfFile:    return "end of fike";
+    case Token::EndOfFile:    return "end of file";
     default:                  return {};
   }
 }
@@ -63,7 +64,7 @@ const ScannerLocation& Scanner::location() const {
   return lastloc;
 }
 
-Token Scanner::token() {
+std::expected<Token, std::string> Scanner::token() {
   if(is_end()) return Token::EndOfFile;
   if(skip_whitespaces()) return Token::EndOfFile;
 
@@ -142,8 +143,12 @@ Token Scanner::token() {
   // kind of weired undefined behavious
   if(curr_char() == '"') {
     forward();
-    while(!is_end() && curr_char() != '"')
+    while(!is_end() && curr_char() != '"') {
+      if (curr_char() == '\n') {
+        return fmterror("unexpected end of string", lastloc);
+      }
       forward();
+    }
 
     auto const& str = data.substr(
       lastloc.cursor + 1,
@@ -172,19 +177,41 @@ std::expected<Node, std::string> Parser::literal() {
 
 std::expected<Node, std::string> Parser::array() {
   Array array;
-  if(token = sc.token(); token == Token::RightBracket) {
+  auto token = sc.token();
+
+  if (!token) {
+    return std::unexpected(token.error());
+  }
+
+  this->token = *token;
+  if(*token == Token::RightBracket) {
     return array;
   }
 
   while(true) {
     const auto& node = parse(false);
-    if(!node.has_value()) return node;
+    if(!node) {
+      return node;
+    }
     array.emplace_back(node.value());
-    if(token = sc.token(); token == Token::RightBracket) break;
-    if(token != Token::Comma) {
+
+    if (!(token = sc.token())) {
+      return std::unexpected(token.error());
+    }
+
+    this->token = *token;
+    if(*token == Token::RightBracket) {
+      break;
+    }
+
+    if(*token != Token::Comma) {
       return fmterror("expected ',' or ']'", sc.location());
     }
-    token = sc.token();
+
+    if (!(token = sc.token())) {
+      return std::unexpected(token.error());
+    }
+    this->token = *token;
   }
 
   return array;
@@ -192,41 +219,69 @@ std::expected<Node, std::string> Parser::array() {
 
 std::expected<Node, std::string> Parser::object() {
   Object object;
-  if(token = sc.token(); token == Token::RightBrace) {
+  auto token = sc.token();
+  if (!token) {
+    return std::unexpected(token.error());
+  }
+
+  this->token = *token;
+  if(*token == Token::RightBrace) {
     return object;
   }
 
   while(true) {
-    if(token != Token::String) {
+    if(*token != Token::String) {
       return fmterror("expected 'string' literal", sc.location());
     }
 
     const std::string key = sc.get<std::string>();
-    if(token = sc.token(); token != Token::Colon) {
+    if (!(token = sc.token())) {
+      return std::unexpected(token.error());
+    }
+
+    this->token = *token;
+    if(*token != Token::Colon) {
       return fmterror("expected ':'", sc.location());
     }
 
     const auto& node = parse();
-    if(!node.has_value()) return node;
+    if(!node) {
+      return node;
+    }
 
-    object.insert({key, node.value()});
-    if(token = sc.token(); token == Token::RightBrace) {
+    object.insert({ key, *node });
+
+    if (!(token = sc.token())) {
+      return std::unexpected(token.error());
+    }
+
+    this->token = *token;
+    if(*token == Token::RightBrace) {
       break;
     }
 
-    if(token != Token::Comma) {
+    if(*token != Token::Comma) {
       return fmterror("expected ',' or '}'", sc.location());
     }
 
-    token = sc.token();
+    if (!(token = sc.token())) {
+      return std::unexpected(token.error());
+    }
+    this->token = *token;
   }
 
   return object;
 }
 
 std::expected<Node, std::string> Parser::parse(bool fetch) {
-  if(fetch)
-    token = sc.token();
+  if(fetch) {
+    auto token = sc.token();
+    if (!token) {
+      return std::unexpected(token.error());
+    }
+    this->token = *token;
+  }
+
 
   switch(token) {
     case Token::LeftBrace:

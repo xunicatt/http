@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.14)
-project(http VERSION 1.3.9+1 LANGUAGES CXX)
+project(http VERSION 1.3.9+2 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
