@@ -14,6 +14,7 @@ set(
   src/router.cc
   src/server.cc
   src/types.cc
+  src/threadpool.cc
 )
 
 add_library(http STATIC ${SOURCES})

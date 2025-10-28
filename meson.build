@@ -17,6 +17,7 @@ srcs = files(
   'src/router.cc',
   'src/server.cc',
   'src/types.cc',
+  'src/threadpool.cc'
 )
 
 http = static_library(
