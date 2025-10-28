@@ -1,7 +1,7 @@
 project(
   'http',
   'cpp',
-  version: '1.3.9+3',
+  version: '1.3.9+4',
   default_options: [
     'cpp_std=c++23',
     'cpp_flags=-Wall -Werror -Wextra',
@@ -17,7 +17,7 @@ srcs = files(
   'src/router.cc',
   'src/server.cc',
   'src/types.cc',
-  'src/threadpool.cc'
+  'src/threadpool.cc',
 )
 
 http = static_library(
@@ -47,6 +47,7 @@ if not meson.is_subproject()
     'include/status.h',
     'include/types.h',
     'include/json.h',
+    'include/threadpool.h',
     subdir: meson.project_name(),
   )
 endif

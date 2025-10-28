@@ -1,22 +1,20 @@
+#include <print>
 #include <threadpool.h>
 #include <mutex>
 
-template <size_t N>
-StaticThreadPool<N>::StaticThreadPool() {
-  for (auto& worker: workers) {
-    worker = std::jthread([this](std::stop_token stoken) {
+DynamicThreadPool::DynamicThreadPool(size_t max_workers) {
+  for (size_t i = 0; i < max_workers; i++) {
+    workers.emplace_back([this](std::stop_token stoken) {
       this->worker(stoken);
     });
   }
 }
 
-template <size_t N>
-StaticThreadPool<N>::~StaticThreadPool() {
+DynamicThreadPool::~DynamicThreadPool() {
   shutdown();
 }
 
-template <size_t N>
-void StaticThreadPool<N>::enqueue(std::function<void()> func) {
+void DynamicThreadPool::enqueue(std::function<void()> func) {
   {
     std::lock_guard lock(tasks_mutex);
     tasks.emplace(
@@ -26,29 +24,30 @@ void StaticThreadPool<N>::enqueue(std::function<void()> func) {
   task_available.notify_one();
 }
 
-template <size_t N>
-void StaticThreadPool<N>::shutdown() {
+void DynamicThreadPool::shutdown() {
   if (!stop.exchange(true)) {
     task_available.notify_all();
   }
 }
 
-template <size_t N>
-void StaticThreadPool<N>::worker(std::stop_token stoken) {
-  std::function<void()> task;
+void DynamicThreadPool::worker(std::stop_token stoken) {
+  while (!stoken.stop_requested()) {
+    std::function<void()> task;
 
-  {
-    std::lock_guard lock(tasks_mutex);
-    task_available.wait(lock, [this, &stoken]() {
-      return stop || !tasks.empty() || stoken.stop_requested();
-    });
+    {
+      std::unique_lock lock(tasks_mutex);
+      task_available.wait(lock, [this, &stoken]() {
+        return stop || !tasks.empty() || stoken.stop_requested();
+      });
 
-    if (stop && tasks.empty())
-      return;
+      if (stop && tasks.empty())
+        return;
 
-    task = std::move(tasks.front());
-    tasks.pop();
+      task = std::move(tasks.front());
+      tasks.pop();
+    }
+
+    task();
   }
-
-  task();
 }
+

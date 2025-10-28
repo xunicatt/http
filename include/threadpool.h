@@ -10,22 +10,17 @@
 #include <thread>
 #include <queue>
 
-#ifndef THREAD_POOL_WORKERS
-  #define THREAD_POOL_WORKERS 10
-#endif
-
-template <size_t N = THREAD_POOL_WORKERS>
-class StaticThreadPool {
+class DynamicThreadPool {
 public:
-  StaticThreadPool();
-  ~StaticThreadPool();
+  DynamicThreadPool(size_t max_workers = std::thread::hardware_concurrency());
+  ~DynamicThreadPool();
   void enqueue(std::function<void()>);
   void shutdown();
 
 private:
   void worker(std::stop_token);
 
-  std::array<std::jthread, N> workers;
+  std::vector<std::jthread> workers;
   std::queue<std::function<void()>> tasks;
   std::condition_variable task_available;
   std::mutex tasks_mutex;

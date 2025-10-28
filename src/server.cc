@@ -2,6 +2,7 @@
 #include <server.h>
 #include <logger.h>
 #include <router.h>
+#include <threadpool.h>
 #include <chrono>
 #include <format>
 #include <functional>
@@ -20,17 +21,20 @@
 #include <sys/socket.h>
 
 #ifndef CLIENT_MAX_QUEUE_SIZE
-  #define CLIENT_MAX_QUEUE_SIZE 10
+  #define CLIENT_MAX_QUEUE_SIZE 512
 #endif
 
 static http::SignalHandler signal_handler { .mut = {}, .close_intp = false };
 static void signal_handler_func(int);
-static void client_handler_func_multi_threaded(const http::Router&,const int);
-static void client_handler_func(const http::Router&,int&,sockaddr*,socklen_t*);
+
+#ifndef THREADPOOL
+  static void client_handler_func_multi_threaded(const http::Router&,const int);
+  static void client_handler_func(const http::Router&,int&,sockaddr*,socklen_t*);
+#endif
 
 namespace http {
-Server::Server(const Router& router)
-: router(router), _port(8080), _addrs("0.0.0.0") {
+Server::Server(const Router& router, const size_t max_workers)
+: router(router), _port(8080), _addrs("0.0.0.0"), pool(DynamicThreadPool(max_workers)) {
   http::debug("registering signal interupt handler");
   if (signal(SIGINT, signal_handler_func) == SIG_ERR) {
     perror(strerror(errno));
@@ -102,14 +106,52 @@ int Server::run() {
   }
   http::debug("started listening on that address");
 
-  http::debug("started main client hanlder in a new thread");
-  std::thread client_hanlder(
-    client_handler_func,
-    std::cref(router),
-    std::ref(_socket),
-    (sockaddr*)&addr,
-    &len
-  );
+  #ifndef THREADPOOL
+    http::debug("started main client hanlder in a new thread");
+    std::thread client_hanlder(
+      client_handler_func,
+      std::cref(router),
+      std::ref(_socket),
+      (sockaddr*)&addr,
+      &len
+    );
+  #else
+    http::debug("starting accept loop in a separate thread");
+    std::jthread accept_thread([this](std::stop_token stoken) {
+      while (!stoken.stop_requested()) {
+        sockaddr_in addr = {};
+        socklen_t len = sizeof(addr);
+        int client = accept(_socket, (sockaddr*)&addr, &len);
+        http::debug("connected to a client");
+
+        if (client < 0) {
+          if (errno == EBADF || errno == EINVAL) {
+            return;
+          }
+
+          http::error(strerror(errno));
+          continue;
+        }
+
+
+        pool.enqueue([this, client = client]() {
+          const std::string res = router.handle(client);
+          write(client, res.c_str(), res.length());
+          http::debug("sent response to client");
+
+          if (close(client) < 0) {
+            http::error(strerror(errno));
+            return;
+          }
+
+          http::debug("connection closed with client");
+          return;
+        });
+
+        http::debug("submitted client to a worker in pool");
+      }
+    });
+  #endif
 
   info(std::format("started server on port: {}", _port));
 
@@ -131,7 +173,12 @@ int Server::run() {
     return ret;
   }
 
-  client_hanlder.join();
+  #ifndef THREADPOOL
+    client_hanlder.join();
+  #else
+    pool.shutdown();
+  #endif
+
   return 0;
 }
 }
@@ -142,48 +189,50 @@ static void signal_handler_func(int) {
   signal_handler.close_intp = true;
 }
 
-static void client_handler_func_multi_threaded(
-  const http::Router& router,
-  const int client
-) {
-  const std::string res = router.handle(client);
-  write(client, res.c_str(), res.length());
-  http::debug("sent response to client");
+#ifndef THREADPOOL
+  void client_handler_func_multi_threaded(
+    const http::Router& router,
+    const int client
+  ) {
+    const std::string res = router.handle(client);
+    write(client, res.c_str(), res.length());
+    http::debug("sent response to client");
 
-  if (close(client) < 0) {
-    http::error(strerror(errno));
+    if (close(client) < 0) {
+      http::error(strerror(errno));
+      return;
+    }
+
+    http::debug("connection closed with client");
     return;
   }
 
-  http::debug("connection closed with client");
-  return;
-}
+  void client_handler_func(
+    const http::Router& router,
+    int& sock,
+    sockaddr* addr,
+    socklen_t* len
+  ) {
+    while (true) {
+      int client = accept(sock, addr, len);
+      http::debug("connected to a client");
 
-static void client_handler_func(
-  const http::Router& router,
-  int& sock,
-  sockaddr* addr,
-  socklen_t* len
-) {
-  while (true) {
-    int client = accept(sock, addr, len);
-    http::debug("connected to a client");
+      if (client < 0) {
+        if (errno == EBADF || errno == EINVAL) {
+          return;
+        }
 
-    if (client < 0) {
-      if (errno == EBADF || errno == EINVAL) {
-        return;
+        http::error(strerror(errno));
+        continue;
       }
 
-      http::error(strerror(errno));
-      continue;
+      http::debug("launched sub client handler in a new thread");
+      std::thread client_handler(
+        client_handler_func_multi_threaded,
+        std::cref(router),
+        client
+      );
+      client_handler.detach();
     }
-
-    http::debug("launched sub client handler in a new thread");
-    std::thread client_handler(
-      client_handler_func_multi_threaded,
-      std::cref(router),
-      client
-    );
-    client_handler.detach();
   }
-}
+#endif

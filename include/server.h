@@ -1,9 +1,11 @@
 #ifndef __HTTP_SERVER_H__
 #define __HTTP_SERVER_H__
 
+#include <thread>
 #include <arpa/inet.h>
 
 #include "router.h"
+#include "threadpool.h"
 
 namespace http {
 class Server {
@@ -12,7 +14,7 @@ public:
   * @brief Create a new server from router.
   * @param router Instance of http::Router.
   */
-  Server(const Router& router);
+  Server(const Router& router, const size_t max_threads = std::thread::hardware_concurrency());
 
   /*
   * @brief Set server port.
@@ -54,6 +56,7 @@ private:
   sockaddr_in   addr;
   socklen_t     len;
   std::string   _addrs;
+  DynamicThreadPool pool;
 };
 }
 
