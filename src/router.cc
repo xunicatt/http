@@ -17,7 +17,7 @@
 #include <unistd.h>
 
 #ifndef CLIENT_POLLING_TIMEOUT
-  #define CLIENT_POLLING_TIMEOUT 500
+  #define CLIENT_POLLING_TIMEOUT 50
 #endif
 
 #ifndef CLIENT_READ_BUFFER_SIZE
@@ -268,8 +268,7 @@ std::string parse_body(const int& fd, const std::optional<size_t>& vlen) {
     return body;
   }
 
-  thread_local static constexpr const size_t size = CLIENT_READ_BUFFER_SIZE;
-  thread_local static char buffer[size] = {0};
+  thread_local static std::array<char, CLIENT_READ_BUFFER_SIZE> buffer;
   std::string body;
 
   pollfd fds[1] = {
@@ -288,11 +287,11 @@ std::string parse_body(const int& fd, const std::optional<size_t>& vlen) {
 
     if (fds[0].revents & POLLIN) {
       ssize_t len = 0;
-      if (len = read(fd, buffer, size - 1); len <= 0) {
+      if (len = read(fd, buffer.data(), buffer.size() - 1); len <= 0) {
         break;
       }
       buffer[len] = '\0';
-      body += buffer;
+      body.append(buffer.data(), len);
     }
   }
 

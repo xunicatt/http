@@ -56,7 +56,10 @@ private:
   sockaddr_in   addr;
   socklen_t     len;
   std::string   _addrs;
-  DynamicThreadPool pool;
+
+  #ifdef THREADPOOL
+    DynamicThreadPool pool;
+  #endif
 };
 }
 

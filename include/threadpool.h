@@ -18,7 +18,7 @@ public:
   void shutdown();
 
 private:
-  void worker(std::stop_token);
+  void worker(const size_t id, std::stop_token);
 
   std::vector<std::jthread> workers;
   std::queue<std::function<void()>> tasks;

@@ -34,7 +34,13 @@ static void signal_handler_func(int);
 
 namespace http {
 Server::Server(const Router& router, const size_t max_workers)
-: router(router), _port(8080), _addrs("0.0.0.0"), pool(DynamicThreadPool(max_workers)) {
+: router(router),
+  _port(8080),
+  _addrs("0.0.0.0")
+#ifdef THREADPOOL
+  , pool(DynamicThreadPool(max_workers))
+#endif
+{
   http::debug("registering signal interupt handler");
   if (signal(SIGINT, signal_handler_func) == SIG_ERR) {
     perror(strerror(errno));
@@ -62,6 +68,9 @@ const std::string& Server::addrs() const {
 
 int Server::run() {
   info(std::format("libhttp version: {}", http::ver::to_string()));
+  #ifdef THREADPOOL
+    info("using threadpool");
+  #endif
 
   int ret = 0;
   const int optval = 1;
@@ -134,6 +143,7 @@ int Server::run() {
         }
 
 
+        http::debug("enqueuing new client handler into the queue");
         pool.enqueue([this, client = client]() {
           const std::string res = router.handle(client);
           write(client, res.c_str(), res.length());

@@ -1,16 +1,23 @@
-v1.3.9+4
+v1.3.9+5
 + (plus) [number] versions are intermediate/rolling versions where new features and changes are introduced
 
 added:
-- added new threadpool for performance improvement, which can be enable by passing "THREADPOOL" define ( -DTHREADPOOL )
+- added debug logs in DynamicThreadPool
+- added thread id to DynamicThreadPool::workers for better debug information
+- added #! (shebang) in tests/test.py
 
 fixes:
-- fixed version string CMakeLists.txt which was causing setup failure
+- fixed a bug where C style static array in a function is only zero initialized one time
+- fixed a bug where DynamicThreadPool::shutdown is called twice
 
 updates:
-- updated CLIENT_MAX_QUEUE_SIZE to 512
-- updated http::Server to accept an optional argument for number of worker threads
+- updated CLIENT_POLLING_TIMEOUT to 50ms
+- DynamicThreadPool instance is only created when THREADPOOL is defined
+- DynamicThreadPool::~DynamicThreadPool now checks DynamicThreadPool::stop condition before calling DynamicThreadPool::shutdown
 
 known issue:
 - library when compiled with clang causes linking issue (macos only)
 - tests might fail due to mismatch of order of keys, because of std::unordered_map
+
+info:
+- in the upcoming major version release(v2.x.x) THREADPOOL will be used as the default client handler for better performance and reliability
