@@ -8,12 +8,12 @@
 namespace http {
 namespace json {
 template <typename T>
-T& Node::get() {
+inline T& Node::get() {
   return std::get<T>(data);
 }
 
 template <typename T>
-const T& Node::get() const {
+inline const T& Node::get() const {
   return std::get<T>(data);
 }
 

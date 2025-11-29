@@ -21,7 +21,7 @@ namespace ver {
   inline constexpr uint8_t Major = 1;
   inline constexpr uint8_t Minor = 3;
   inline constexpr uint8_t Patch = 9;
-  inline constexpr uint8_t Roll  = 5;
+  inline constexpr uint8_t Roll  = 6;
 
   [[nodiscard]]
   constexpr inline std::string to_string() {
@@ -29,7 +29,7 @@ namespace ver {
       return std::format("v{}.{}.{}", Major, Minor, Patch);
     }
 
-    return std::format("v{}.{}.{}+{}", Major, Minor, Patch, Roll);
+    return std::format("v{}.{}.{}.{} (rolling)", Major, Minor, Patch, Roll);
   }
 } // version namespace end
 

@@ -33,20 +33,32 @@ static void signal_handler_func(int);
 #endif
 
 namespace http {
-Server::Server(const Router& router, const size_t max_workers)
-: router(router),
-  _port(8080),
-  _addrs("0.0.0.0")
 #ifdef THREADPOOL
-  , pool(DynamicThreadPool(max_workers))
-#endif
-{
-  http::debug("registering signal interupt handler");
-  if (signal(SIGINT, signal_handler_func) == SIG_ERR) {
-    perror(strerror(errno));
-    exit(1);
+  Server::Server(const Router& router, const size_t max_workers)
+  : router(router),
+    _port(8080),
+    _addrs("0.0.0.0"),
+    pool(DynamicThreadPool(max_workers))
+  {
+    http::debug("registering signal interupt handler");
+    if (signal(SIGINT, signal_handler_func) == SIG_ERR) {
+      perror(strerror(errno));
+      exit(1);
+    }
   }
-}
+#else
+  Server::Server(const Router& router)
+  : router(router),
+    _port(8080),
+    _addrs("0.0.0.0")
+  {
+    http::debug("registering signal interupt handler");
+    if (signal(SIGINT, signal_handler_func) == SIG_ERR) {
+      perror(strerror(errno));
+      exit(1);
+    }
+  }
+#endif
 
 Server& Server::port(const uint16_t& port) {
   _port = port;

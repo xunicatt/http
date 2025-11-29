@@ -4,7 +4,7 @@
 #include <string>
 
 namespace http {
-enum StatusCode {
+enum class StatusCode {
 	Invalid                       = -1,
 
 	Continue                      = 100,
@@ -81,17 +81,34 @@ enum StatusCode {
 std::string to_string(const StatusCode&);
 
 [[nodiscard]]
-inline bool is_informational(const StatusCode&);
+static inline bool is_informational(const StatusCode& code) {
+  return (static_cast<int>(code) >= 100 && static_cast<int>(code) < 200);
+}
+
 [[nodiscard]]
-inline bool is_successful(const StatusCode&);
+static inline bool is_successful(const StatusCode& code) {
+  return (static_cast<int>(code) >= 200 && static_cast<int>(code) < 300);
+}
+
 [[nodiscard]]
-inline bool is_redirection(const StatusCode&);
+static inline bool is_redirection(const StatusCode& code) {
+  return (static_cast<int>(code) >= 300 && static_cast<int>(code) < 400);
+}
+
 [[nodiscard]]
-inline bool is_client_error(const StatusCode&);
+static inline bool is_client_error(const StatusCode& code) {
+  return (static_cast<int>(code) >= 400 && static_cast<int>(code) < 500);
+}
+
 [[nodiscard]]
-inline bool is_server_error(const StatusCode&);
+static inline bool is_server_error(const StatusCode& code) {
+  return (static_cast<int>(code) >= 500);
+}
+
 [[nodiscard]]
-inline bool is_error(const StatusCode&);
+static inline bool is_error(const StatusCode& code) {
+  return (static_cast<int>(code) >= 400);
+}
 }
 
 #endif

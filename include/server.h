@@ -14,7 +14,11 @@ public:
   * @brief Create a new server from router.
   * @param router Instance of http::Router.
   */
-  Server(const Router& router, const size_t max_threads = std::thread::hardware_concurrency());
+  #ifdef THREADPOOL
+    explicit Server(const Router& router, const size_t max_threads = std::thread::hardware_concurrency());
+  #else
+    explicit Server(const Router& router);
+  #endif
 
   /*
   * @brief Set server port.

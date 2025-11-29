@@ -65,7 +65,7 @@ private:
 };
 
 template <typename T>
-T& Scanner::get() {
+inline T& Scanner::get() {
   return std::get<T>(value);
 }
 

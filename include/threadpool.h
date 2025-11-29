@@ -12,7 +12,7 @@
 
 class DynamicThreadPool {
 public:
-  DynamicThreadPool(size_t max_workers = std::thread::hardware_concurrency());
+  explicit DynamicThreadPool(size_t max_workers = std::thread::hardware_concurrency());
   ~DynamicThreadPool();
   void enqueue(std::function<void()>);
   void shutdown();

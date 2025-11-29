@@ -38,14 +38,14 @@ static http::Response validate_otp(const http::Request& req) {
   const auto& root = res.value().get<json::Object>();
 
   if(!root.contains("name") || !root.contains("otp")) {
-    return http::BadRequest;
+    return http::StatusCode::BadRequest;
   }
 
   const auto& name_node = root.at("name");
   const auto& otp_node = root.at("otp");
 
   if(name_node.type() != json::NodeType::String || otp_node.type() != json::NodeType::Int) {
-    return http::BadRequest;
+    return http::StatusCode::BadRequest;
   }
 
   const auto& otp = otp_node.get<int64_t>();

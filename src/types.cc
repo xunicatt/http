@@ -22,30 +22,6 @@ std::string to_string(const Method& m) {
   }
 }
 
-bool is_informational(const StatusCode& code) {
-  return (code >= 100 && code < 200);
-}
-
-bool is_successful(const StatusCode& code) {
-  return (code >= 200 && code < 300);
-}
-
-bool is_redirection(const StatusCode& code) {
-  return (code >= 300 && code < 400);
-}
-
-bool is_client_error(const StatusCode& code) {
-  return (code >= 400 && code < 500);
-}
-
-bool is_server_error(const StatusCode& code) {
-  return (code >= 500);
-}
-
-bool is_error(const StatusCode& code) {
-  return (code >= 400);
-}
-
 std::string to_string(const StatusCode& code) {
 	switch (code) {
   	case StatusCode::Continue: return "Continue";
