@@ -44,7 +44,7 @@ router.add(
   http::Method::Get,
   [](const http::Request& req) {
     if(!req.params.contains("uname")) {
-      return http::Response(http::HttpStatusCode::BadRequest);
+      return http::Response(http::StatusCode::BadRequest);
     }
 
     const auto& uname = req.param.at("uname");
