@@ -23,6 +23,7 @@ This script tests the functionality of the library as a single unit.
       Each line corresponds to the expected output of the respective request.
 
 + Add the new "test<number>/" directory to the 'path' list in test.py
+  - If the new test's answers are in json format then add the test in 'isjson' dictionary too
 + To clean executables, run: rm *.out
 
 -- How to Run?

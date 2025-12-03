@@ -20,7 +20,6 @@ fixes:
 
 known issue:
 - library when compiled with clang causes linking issue (macos only)
-- tests might fail due to mismatch of order of keys, because of std::unordered_map
 
 info:
 - in the upcoming major version release(v2.x.x) THREADPOOL will be used as the default client handler for better performance and reliability

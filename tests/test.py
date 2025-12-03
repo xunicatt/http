@@ -5,6 +5,7 @@ import sys
 import signal
 import subprocess
 import time
+import json
 
 lib = "http"
 paths = [
@@ -14,6 +15,10 @@ paths = [
     "test4",
     "test5",
 ]
+
+isjson = {
+    "test5": True,
+}
 
 CXX = os.environ.get("CXX")
 if CXX is None:
@@ -116,11 +121,22 @@ def test(path: str, flags: list[str]):
 
     i = 0
     while i < len(expected):
-        if expected[i].rstrip() != got[i].rstrip():
+        e = expected[i].rstrip()
+        g = got[i].rstrip()
+        error = False
+
+        if path in isjson:
+            if json.loads(e) != json.loads(g):
+                error = True
+        elif e != g:
+                error = True
+
+        if error:
             print("[ERROR] test failed")
             print(f"\texpected: {expected[i]}")
             print(f"\tgot: {got[i]}")
             exit(1)
+
         i += 1
 
     print(f"[INFO] passed: {path}")
