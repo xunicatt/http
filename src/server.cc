@@ -19,12 +19,13 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
+#include <fcntl.h>
 
 #ifndef CLIENT_MAX_QUEUE_SIZE
   #define CLIENT_MAX_QUEUE_SIZE 512
 #endif
 
-static http::SignalHandler signal_handler { .mut = {}, .close_intp = false };
+static http::SignalHandler s_signal_handler { .mut = {}, .close_intp = false };
 static void signal_handler_func(int);
 
 #ifndef THREADPOOL
@@ -35,10 +36,10 @@ static void signal_handler_func(int);
 namespace http {
 #ifdef THREADPOOL
   Server::Server(const Router& router, const size_t max_workers)
-  : router(router),
-    _port(8080),
-    _addrs("0.0.0.0"),
-    pool(DynamicThreadPool(max_workers))
+  : m_router(router),
+    m_port(8080),
+    m_addrs("0.0.0.0"),
+    m_pool(DynamicThreadPool(max_workers))
   {
     http::debug("registering signal interupt handler");
     if (signal(SIGINT, signal_handler_func) == SIG_ERR) {
@@ -48,9 +49,9 @@ namespace http {
   }
 #else
   Server::Server(const Router& router)
-  : router(router),
-    _port(8080),
-    _addrs("0.0.0.0")
+  : m_router(router),
+    m_port(8080),
+    m_addrs("0.0.0.0")
   {
     http::debug("registering signal interupt handler");
     if (signal(SIGINT, signal_handler_func) == SIG_ERR) {
@@ -61,21 +62,21 @@ namespace http {
 #endif
 
 Server& Server::port(const uint16_t& port) {
-  _port = port;
+  m_port = port;
   return *this;
 }
 
 Server& Server::addrs(const std::string& vaddrs) {
-  _addrs = vaddrs;
+  m_addrs = vaddrs;
   return *this;
 }
 
 uint16_t Server::port() const {
-  return _port;
+  return m_port;
 }
 
 const std::string& Server::addrs() const {
-  return _addrs;
+  return m_addrs;
 }
 
 int Server::run() {
@@ -87,13 +88,13 @@ int Server::run() {
   int ret = 0;
   const int optval = 1;
 
-  if (_socket = socket(AF_INET, SOCK_STREAM, 0); _socket < 0) {
-    return _socket;
+  if (m_socket = socket(AF_INET, SOCK_STREAM, 0); m_socket < 0) {
+    return m_socket;
   }
   http::debug("created socket");
 
   if (ret = setsockopt(
-    _socket,
+    m_socket,
     SOL_SOCKET,
     SO_REUSEADDR,
     &optval,
@@ -103,26 +104,31 @@ int Server::run() {
   }
   http::debug("set socket options");
 
-  addr = (sockaddr_in){
+  #ifdef THREADPOOL
+    int flags = fcntl(m_socket, F_GETFL, 0);
+    fcntl(m_socket, F_SETFL, flags | O_NONBLOCK);
+  #endif
+
+  m_addr = (sockaddr_in){
     #if defined(__APPLE__) || defined(__MACH__)
       .sin_len = {},
     #endif
     .sin_family = AF_INET,
-    .sin_port = htons(_port),
+    .sin_port = htons(m_port),
     .sin_addr = {
-      .s_addr = inet_addr(_addrs.c_str())
+      .s_addr = inet_addr(m_addrs.c_str())
     },
     .sin_zero = {},
   };
 
-  len = sizeof(addr);
+  m_len = sizeof(m_addr);
 
-  if (ret = bind(_socket, (sockaddr*)&addr, len); ret < 0) {
+  if (ret = bind(m_socket, (sockaddr*)&m_addr, m_len); ret < 0) {
     return ret;
   }
   http::debug("binded socket to an address");
 
-  if (ret = listen(_socket, CLIENT_MAX_QUEUE_SIZE); ret < 0) {
+  if (ret = listen(m_socket, CLIENT_MAX_QUEUE_SIZE); ret < 0) {
     return ret;
   }
   http::debug("started listening on that address");
@@ -131,22 +137,28 @@ int Server::run() {
     http::debug("started main client hanlder in a new thread");
     std::thread client_hanlder(
       client_handler_func,
-      std::cref(router),
-      std::ref(_socket),
-      (sockaddr*)&addr,
-      &len
+      std::cref(m_router),
+      std::ref(m_socket),
+      (sockaddr*)&m_addr,
+      &m_len
     );
   #else
     http::debug("starting accept loop in a separate thread");
-    std::jthread accept_thread([this](std::stop_token stoken) {
+    m_accept_thread = std::jthread([this](std::stop_token stoken) {
       while (!stoken.stop_requested()) {
         sockaddr_in addr = {};
         socklen_t len = sizeof(addr);
-        int client = accept(_socket, (sockaddr*)&addr, &len);
+        int client = accept(m_socket, (sockaddr*)&addr, &len);
         http::debug("connected to a client");
 
         if (client < 0) {
+          if (errno == EAGAIN || errno == EWOULDBLOCK) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            continue;
+          }
+
           if (errno == EBADF || errno == EINVAL) {
+            http::debug("accept() returned with EBADF/EINVAL");
             return;
           }
 
@@ -156,8 +168,9 @@ int Server::run() {
 
 
         http::debug("enqueuing new client handler into the queue");
-        pool.enqueue([this, client = client]() {
-          const std::string res = router.handle(client);
+        m_pool.enqueue([router = std::cref(m_router), client = client]() {
+          const std::string res = router.get().handle(client);
+
           write(client, res.c_str(), res.length());
           http::debug("sent response to client");
 
@@ -175,30 +188,33 @@ int Server::run() {
     });
   #endif
 
-  info(std::format("started server on port: {}", _port));
+  info(std::format("started server on port: {}", m_port));
 
   while (true) {
     { /* mutex is scoped to call unlock at the end of scope */
-      std::lock_guard<std::mutex> guard(signal_handler.mut);
-      if(signal_handler.close_intp) break;
+      std::lock_guard<std::mutex> guard(s_signal_handler.mut);
+      if(s_signal_handler.close_intp) break;
     }
 
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
   }
 
   info("shutting down");
-  if (ret = shutdown(_socket, SHUT_RDWR); ret < 0) {
-    return ret;
-  }
+  #ifdef THREADPOOL
+    m_accept_thread.request_stop();
+  #endif
 
-  if (ret = close(_socket); ret < 0) {
-    return ret;
-  }
+  shutdown(m_socket, SHUT_RDWR);
+  close(m_socket);
 
   #ifndef THREADPOOL
     client_hanlder.join();
   #else
-    pool.shutdown();
+    if (m_accept_thread.joinable()) {
+      m_accept_thread.join();
+    }
+
+    m_pool.shutdown();
   #endif
 
   return 0;
@@ -207,8 +223,8 @@ int Server::run() {
 
 static void signal_handler_func(int) {
   http::info("received shutdown signal");
-  std::lock_guard<std::mutex> guard(signal_handler.mut);
-  signal_handler.close_intp = true;
+  std::lock_guard<std::mutex> guard(s_signal_handler.mut);
+  s_signal_handler.close_intp = true;
 }
 
 #ifndef THREADPOOL

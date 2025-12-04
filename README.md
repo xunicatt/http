@@ -187,9 +187,10 @@ make
 > [!WARNING]
 > EXPERIMENTAL MODULES ARE NOT READY FOR GENERAL USE. THESE MODULES MAY HAVE INCOMPLETE FEATURES AND ARE SUBJECT TO CHANGE OR BREAK AT ANY TIME.
 
-To use experimental modules from 'http' in a meson subproject, we have to enable `HTTP_EXPERIMENTAL_MODULES` flag by using:
+### Threadppol
+To use threadppol version of the library we have to enable `THREADPOOL` flag by using:
 ```bash
-meson setup build -Dhttp:cpp_args="-DHTTP_EXPERIMENTAL_MODULES" -Dcpp_args="-DHTTP_EXPERIMENTAL_MODULES"
+meson setup build -Dhttp:cpp_args="-DTHREADPOOL" -Dcpp_args="-DTHREADPOOL"
 ```
 
 ## Docs

@@ -21,7 +21,7 @@ namespace ver {
   inline constexpr uint8_t Major = 1;
   inline constexpr uint8_t Minor = 3;
   inline constexpr uint8_t Patch = 9;
-  inline constexpr uint8_t Roll  = 6;
+  inline constexpr uint8_t Roll  = 7;
 
   [[nodiscard]]
   constexpr inline std::string to_string() {

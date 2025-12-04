@@ -31,17 +31,17 @@ ScannerLocation::ScannerLocation()
 : cursor(0), row(0), lnbeg(0) {}
 
 Scanner::Scanner(const std::string& data)
-: data(data) {}
+: m_data(data) {}
 
 bool Scanner::is_end() const {
-  return loc.cursor >= data.length();
+  return m_loc.cursor >= m_data.length();
 }
 
 void Scanner::forward() {
-  if (!is_end() && loc.cursor++ &&
+  if (!is_end() && m_loc.cursor++ &&
         !is_end() && curr_char() == '\n') {
-    loc.row++;
-    loc.lnbeg = loc.cursor + 1;
+    m_loc.row++;
+    m_loc.lnbeg = m_loc.cursor + 1;
   }
 }
 
@@ -56,18 +56,18 @@ char Scanner::curr_char() const {
   if (is_end()) {
     return 0;
   }
-  return data[loc.cursor];
+  return m_data[m_loc.cursor];
 }
 
 char Scanner::peek_char() const {
-  if (loc.cursor + 1 >= data.length()) {
+  if (m_loc.cursor + 1 >= m_data.length()) {
     return 0;
   }
-  return data[loc.cursor + 1];
+  return m_data[m_loc.cursor + 1];
 }
 
 const ScannerLocation& Scanner::location() const {
-  return lastloc;
+  return m_lastloc;
 }
 
 std::expected<Token, std::string> Scanner::token() {
@@ -79,7 +79,7 @@ std::expected<Token, std::string> Scanner::token() {
     return Token::EndOfFile;
   }
 
-  lastloc = loc;
+  m_lastloc = m_loc;
 
   Token t = Token::None;
   switch (curr_char()) {
@@ -123,16 +123,16 @@ std::expected<Token, std::string> Scanner::token() {
       forward();
     }
 
-    const auto& number = data.substr(
-      lastloc.cursor,
-      loc.cursor - lastloc.cursor
+    const auto& number = m_data.substr(
+      m_lastloc.cursor,
+      m_loc.cursor - m_lastloc.cursor
     );
     if (is_float) {
-      value = std::stod(number);
+      m_value = std::stod(number);
       return Token::Float;
     }
 
-    value = std::stoll(number);
+    m_value = std::stoll(number);
     return Token::Int;
   }
 
@@ -141,15 +141,15 @@ std::expected<Token, std::string> Scanner::token() {
       forward();
     }
 
-    auto const& ident = data.substr(
-      lastloc.cursor,
-      loc.cursor - lastloc.cursor
+    auto const& ident = m_data.substr(
+      m_lastloc.cursor,
+      m_loc.cursor - m_lastloc.cursor
     );
     if (ident != "true" && ident != "false") {
       return Token::Invalid;
     }
 
-    value = ident == "true";
+    m_value = ident == "true";
     return Token::Bool;
   }
 
@@ -163,11 +163,11 @@ std::expected<Token, std::string> Scanner::token() {
       forward();
     }
 
-    auto const& str = data.substr(
-      lastloc.cursor + 1,
-      loc.cursor - lastloc.cursor - 1
+    auto const& str = m_data.substr(
+      m_lastloc.cursor + 1,
+      m_loc.cursor - m_lastloc.cursor - 1
     );
-    value = str;
+    m_value = str;
     forward();
     return Token::String;
   }
@@ -176,27 +176,27 @@ std::expected<Token, std::string> Scanner::token() {
 }
 
 Parser::Parser(Scanner& sc)
-: sc(sc) {}
+: m_sc(sc) {}
 
 std::expected<Node, std::string> Parser::literal() {
-  switch (token) {
-    case Token::Int:    return sc.get<int64_t>();
-    case Token::Float:  return sc.get<double>();
-    case Token::Bool:   return sc.get<bool>();
-    case Token::String: return sc.get<std::string>();
-    default:            return fmterror("expected a literal", sc.location());
+  switch (m_token) {
+    case Token::Int:    return m_sc.get<int64_t>();
+    case Token::Float:  return m_sc.get<double>();
+    case Token::Bool:   return m_sc.get<bool>();
+    case Token::String: return m_sc.get<std::string>();
+    default:            return fmterror("expected a literal", m_sc.location());
   }
 }
 
 std::expected<Node, std::string> Parser::array() {
   Array array;
-  auto token = sc.token();
+  auto token = m_sc.token();
 
   if (!token) {
     return std::unexpected(token.error());
   }
 
-  this->token = *token;
+  m_token = *token;
   if (*token == Token::RightBracket) {
     return array;
   }
@@ -208,23 +208,23 @@ std::expected<Node, std::string> Parser::array() {
     }
     array.emplace_back(*node);
 
-    if (!(token = sc.token())) {
+    if (!(token = m_sc.token())) {
       return std::unexpected(token.error());
     }
 
-    this->token = *token;
+    m_token = *token;
     if (*token == Token::RightBracket) {
       break;
     }
 
     if (*token != Token::Comma) {
-      return fmterror("expected ',' or ']'", sc.location());
+      return fmterror("expected ',' or ']'", m_sc.location());
     }
 
-    if (!(token = sc.token())) {
+    if (!(token = m_sc.token())) {
       return std::unexpected(token.error());
     }
-    this->token = *token;
+    m_token = *token;
   }
 
   return array;
@@ -232,29 +232,29 @@ std::expected<Node, std::string> Parser::array() {
 
 std::expected<Node, std::string> Parser::object() {
   Object object;
-  auto token = sc.token();
+  auto token = m_sc.token();
   if (!token) {
     return std::unexpected(token.error());
   }
 
-  this->token = *token;
+  m_token = *token;
   if (*token == Token::RightBrace) {
     return object;
   }
 
   while (true) {
     if (*token != Token::String) {
-      return fmterror("expected 'string' literal", sc.location());
+      return fmterror("expected 'string' literal", m_sc.location());
     }
 
-    const std::string key = sc.get<std::string>();
-    if (!(token = sc.token())) {
+    const std::string key = m_sc.get<std::string>();
+    if (!(token = m_sc.token())) {
       return std::unexpected(token.error());
     }
 
-    this->token = *token;
+    m_token = *token;
     if (*token != Token::Colon) {
-      return fmterror("expected ':'", sc.location());
+      return fmterror("expected ':'", m_sc.location());
     }
 
     const auto& node = parse();
@@ -264,23 +264,23 @@ std::expected<Node, std::string> Parser::object() {
 
     object.insert({ key, *node });
 
-    if (!(token = sc.token())) {
+    if (!(token = m_sc.token())) {
       return std::unexpected(token.error());
     }
 
-    this->token = *token;
+    m_token = *token;
     if (*token == Token::RightBrace) {
       break;
     }
 
     if (*token != Token::Comma) {
-      return fmterror("expected ',' or '}'", sc.location());
+      return fmterror("expected ',' or '}'", m_sc.location());
     }
 
-    if (!(token = sc.token())) {
+    if (!(token = m_sc.token())) {
       return std::unexpected(token.error());
     }
-    this->token = *token;
+    m_token = *token;
   }
 
   return object;
@@ -288,15 +288,15 @@ std::expected<Node, std::string> Parser::object() {
 
 std::expected<Node, std::string> Parser::parse(bool fetch) {
   if (fetch) {
-    auto token = sc.token();
+    auto token = m_sc.token();
     if (!token) {
       return std::unexpected(token.error());
     }
-    this->token = *token;
+    m_token = *token;
   }
 
 
-  switch (token) {
+  switch (m_token) {
     case Token::LeftBrace:
       return object();
 

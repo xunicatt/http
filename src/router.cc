@@ -51,26 +51,26 @@ static const std::unordered_map<std::string, http::Method> methods = {
 
 namespace http {
 void Router::add(const std::string& url, const Method& method, const RouteFunc& func) {
-  if (!static_routes.contains(url)) {
-    static_routes[url] = {{ method, func }};
+  if (!m_static_routes.contains(url)) {
+    m_static_routes[url] = {{ method, func }};
     return;
   }
 
-  auto& method_table = static_routes.at(url);
+  auto& method_table = m_static_routes.at(url);
   method_table[method] = func;
 }
 
 void Router::add_regex(const std::string& url, const Method& method, const RouteFunc& func) {
   const auto& res = std::find_if(
-    regex_routes.begin(),
-    regex_routes.end(),
+    m_regex_routes.begin(),
+    m_regex_routes.end(),
     [&url](const std::pair<RegexWrapper, RouteMethodTable>& item) {
       return item.first.string == url;
     }
   );
 
-  if (res == regex_routes.end()) {
-    regex_routes.emplace_back(
+  if (res == m_regex_routes.end()) {
+    m_regex_routes.emplace_back(
       RegexWrapper{ std::regex{url}, url },
       RouteMethodTable{{ method, func }}
     );
@@ -93,8 +93,8 @@ std::string Router::handle(const int& fd) const {
     req.url
   ));
 
-  if (static_routes.contains(req.url)) {
-    const auto& method_table = static_routes.at(req.url);
+  if (m_static_routes.contains(req.url)) {
+    const auto& method_table = m_static_routes.at(req.url);
     if (method_table.contains(req.method)) {
       const auto& func = method_table.at(req.method);
       return func(req).to_string();
@@ -102,8 +102,8 @@ std::string Router::handle(const int& fd) const {
   }
 
   const auto& res = std::find_if(
-    regex_routes.begin(),
-    regex_routes.end(),
+    m_regex_routes.begin(),
+    m_regex_routes.end(),
     [req](const std::pair<RegexWrapper, RouteMethodTable>& item) {
       if (std::regex_match(req.url, item.first.regex)) {
         return item.second.contains(req.method);
@@ -113,7 +113,7 @@ std::string Router::handle(const int& fd) const {
     }
   );
 
-  if (res == regex_routes.end()) {
+  if (res == m_regex_routes.end()) {
     warning(std::format(
       "url '{}' with method '{}' not found",
       req.url,
@@ -218,7 +218,7 @@ ParsedURL parse_url(const std::string& url) {
 }
 
 std::pair<std::string, std::string> parse_header_line(const std::string& line) {
-  auto trim = [](std::string s) {
+  const auto trim = [](std::string s) {
       s.erase(
         s.begin(),
         std::find_if(

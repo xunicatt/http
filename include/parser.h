@@ -58,15 +58,15 @@ private:
   [[nodiscard]]
   char peek_char() const;
 
-  std::variant<int64_t, double, bool, std::string> value;
-  const std::string& data;
-  ScannerLocation    loc;
-  ScannerLocation    lastloc;
+  std::variant<int64_t, double, bool, std::string> m_value;
+  const std::string& m_data;
+  ScannerLocation    m_loc;
+  ScannerLocation    m_lastloc;
 };
 
 template <typename T>
 inline T& Scanner::get() {
-  return std::get<T>(value);
+  return std::get<T>(m_value);
 }
 
 class Parser {
@@ -83,8 +83,8 @@ private:
   [[nodiscard]]
   std::expected<Node, std::string> literal();
 
-  Scanner& sc;
-  Token    token;
+  Scanner& m_sc;
+  Token    m_token;
 };
 } // json namespace end
 } // http namespace end

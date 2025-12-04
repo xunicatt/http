@@ -14,8 +14,9 @@ public:
   * @brief Create a new server from router.
   * @param router Instance of http::Router.
   */
+
   #ifdef THREADPOOL
-    explicit Server(const Router& router, const size_t max_threads = std::thread::hardware_concurrency());
+    explicit Server(const Router& router, const size_t max_workers = std::thread::hardware_concurrency());
   #else
     explicit Server(const Router& router);
   #endif
@@ -54,15 +55,16 @@ public:
   int run();
 
 private:
-  const Router& router;
-  uint16_t      _port;
-  int           _socket;
-  sockaddr_in   addr;
-  socklen_t     len;
-  std::string   _addrs;
+  const Router& m_router;
+  uint16_t      m_port;
+  int           m_socket;
+  sockaddr_in   m_addr;
+  socklen_t     m_len;
+  std::string   m_addrs;
 
   #ifdef THREADPOOL
-    DynamicThreadPool pool;
+    DynamicThreadPool m_pool;
+    std::jthread m_accept_thread;
   #endif
 };
 }

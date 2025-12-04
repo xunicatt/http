@@ -34,13 +34,13 @@ public:
 private:
   // TODO: simplify whatever fuck this is!
   using RouteMethodTable = std::unordered_map<http::Method, RouteFunc>;
-  std::unordered_map<std::string, RouteMethodTable> static_routes;
+  std::unordered_map<std::string, RouteMethodTable> m_static_routes;
   std::vector<
     std::pair<
       RegexWrapper,
       RouteMethodTable
     >
-  > regex_routes;
+  > m_regex_routes;
 };
 }
 

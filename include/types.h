@@ -6,8 +6,6 @@
 #include <unordered_map>
 #include <vector>
 #include <regex>
-#include <variant>
-#include <cstdint>
 
 #include "status.h"
 #include "methods.h"
@@ -89,99 +87,10 @@ public:
   std::string to_string() const;
 
 private:
-  std::string body;
-  StatusCode  code;
-  Header      header;
+  std::string m_body;
+  StatusCode  m_code;
+  Header      m_header;
 };
-
-namespace json {
-class Node;
-enum class NodeType {
-  Int,
-  Float,
-  Bool,
-  String,
-  Array,
-  Object,
-};
-
-[[nodiscard]]
-std::string to_string(const NodeType&);
-
-using Array = std::vector<Node>;
-using Object = std::unordered_map<std::string, Node>;
-using Data = std::variant<
-  int64_t,
-  double,
-  bool,
-  std::string,
-  Array,
-  Object
->;
-
-class Node {
-public:
-  // to keep backwards compatibility
-  // Node constructor with int is left out
-  // as an option
-  Node(const int&);
-  Node(const int64_t&);
-  Node(const double&);
-  Node(const bool&);
-  Node(const char*);
-  Node(const std::string&);
-  Node(const Array&);
-  Node(const Object&);
-
-  /*
-  * @brief Get the Type of the Node.
-  * @return NodeType.
-  */
-  [[nodiscard]]
-  const NodeType& type() const;
-
-  /*
-  * @brief Get the Immutable Internal Data vairant of the Node.
-  * @return Data.
-  */
-  [[nodiscard]]
-  const Data& get() const;
-
-  /*
-  * @brief Get the mutable Internal Data vairant of the Node.
-  * @return Data.
-  */
-  [[nodiscard]]
-  Data& get();
-
-  /*
-  * @brief Get the mutable Data of the requested type from the Node.
-  * @return T.
-  */
-  template <typename T>
-  [[nodiscard]]
-  T& get();
-
-  /*
-  * @brief Get the immutable Data of the requested type from the Node.
-  * @return T.
-  */
-  template <typename T>
-  [[nodiscard]]
-  const T& get() const;
-
-  /*
-  * @brief Converts a node to equivalent json string.
-  * @return Json String format of the node.
-  */
-  [[nodiscard]]
-  std::string to_string() const;
-
-private:
-  Data     data;
-  NodeType _type;
-};
-} // json namespace end
 } // http namespace end
 
 #endif

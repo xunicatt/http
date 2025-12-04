@@ -96,42 +96,42 @@ std::string to_string(const StatusCode& code) {
 }
 
 Response::Response(const std::string& body)
-: body(body), code(StatusCode::Ok) {
-  set_default_header_fields(header);
+: m_body(body), m_code(StatusCode::Ok) {
+  set_default_header_fields(m_header);
   append_header("Content-Length", std::to_string(body.size()));
 }
 
 Response::Response(const StatusCode& code)
-: body(""), code(code) {
-  set_default_header_fields(header);
+: m_body(""), m_code(code) {
+  set_default_header_fields(m_header);
   append_header("Content-Length", std::to_string(0));
 }
 
 Response::Response(const std::string& body, const StatusCode& code)
-: body(body), code(code) {
-  set_default_header_fields(header);
+: m_body(body), m_code(code) {
+  set_default_header_fields(m_header);
   append_header("Content-Length", std::to_string(body.size()));
 }
 
 void Response::append_header(const std::string& key, const std::string& value) {
-  header.insert({ key, value });
+  m_header.insert({ key, value });
 }
 void Response::set_body(const std::string& vbody) {
-  body = vbody;
-  append_header("Content-Length", std::to_string(body.size()));
+  m_body = vbody;
+  append_header("Content-Length", std::to_string(m_body.size()));
 }
 
 void Response::set_code(const StatusCode& vcode) {
-  code = vcode;
+  m_code = vcode;
 }
 
 std::string Response::to_string() const {
   return std::format(
     HTTP_VERSION" {} {}\n{}\r\n{}",
-    static_cast<int>(code),
-    http::to_string(code),
-    header_to_string(header),
-    body
+    static_cast<int>(m_code),
+    http::to_string(m_code),
+    header_to_string(m_header),
+    m_body
   );
 }
 

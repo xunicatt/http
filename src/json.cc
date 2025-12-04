@@ -10,43 +10,43 @@ static std::string data_to_string(const json::Data&);
 namespace http {
 namespace json {
 Node::Node(const int& data)
-: data(data), _type(NodeType::Int) {}
+: m_data(data), m_type(NodeType::Int) {}
 
 Node::Node(const int64_t& data)
-: data(data), _type(NodeType::Int) {}
+: m_data(data), m_type(NodeType::Int) {}
 
 Node::Node(const double& data)
-: data(data), _type(NodeType::Float) {}
+: m_data(data), m_type(NodeType::Float) {}
 
 Node::Node(const bool& data)
-: data(data), _type(NodeType::Bool) {}
+: m_data(data), m_type(NodeType::Bool) {}
 
 Node::Node(const char* data)
-: data(data), _type(NodeType::String) {}
+: m_data(data), m_type(NodeType::String) {}
 
 Node::Node(const std::string& data)
-: data(data), _type(NodeType::String) {}
+: m_data(data), m_type(NodeType::String) {}
 
 Node::Node(const Array& data)
-: data(data), _type(NodeType::Array) {}
+: m_data(data), m_type(NodeType::Array) {}
 
 Node::Node(const Object& data)
-: data(data), _type(NodeType::Object){}
+: m_data(data), m_type(NodeType::Object){}
 
 const NodeType& Node::type() const {
-  return _type;
+  return m_type;
 }
 
 const Data& Node::get() const {
-  return data;
+  return m_data;
 }
 
 Data& Node::get() {
-  return data;
+  return m_data;
 }
 
 std::string Node::to_string() const {
-  return data_to_string(data);
+  return data_to_string(m_data);
 }
 
 std::string encode(const Node& node) {

@@ -20,11 +20,11 @@ public:
 private:
   void worker(const size_t id, std::stop_token);
 
-  std::vector<std::jthread> workers;
-  std::queue<std::function<void()>> tasks;
-  std::condition_variable task_available;
-  std::mutex tasks_mutex;
-  std::atomic<bool> stop = false;
+  std::vector<std::jthread>         m_workers;
+  std::queue<std::function<void()>> m_tasks;
+  std::condition_variable           m_task_available;
+  std::mutex                        m_tasks_mutex;
+  std::atomic<bool>                 m_stop = false;
 };
 
 #endif // __HTTP_THREADPOOL__

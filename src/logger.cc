@@ -2,26 +2,26 @@
 #include <print>
 
 namespace http {
-static LogLevel level = LogLevel::Info;
+static LogLevel s_level = LogLevel::Info;
 
-void loglevel(const LogLevel& vlevel) {
-  level = vlevel;
+void loglevel(const LogLevel& level) {
+  s_level = level;
 }
 
 void info(const std::string& msg) {
-  if (level <= LogLevel::Info) {
+  if (s_level <= LogLevel::Info) {
     std::println("[INFO] {}", msg);
   }
 }
 
 void warning(const std::string& msg) {
-  if (level <= LogLevel::Warning) {
+  if (s_level <= LogLevel::Warning) {
     std::println("[WARN] {}", msg);
   }
 }
 
 void debug(const std::string& msg) {
-  if (level <= LogLevel::Debug) {
+  if (s_level <= LogLevel::Debug) {
     std::println("[DEBUG] {}", msg);
   }
 }
