@@ -20,7 +20,7 @@ isjson = {
     "test5": True,
 }
 
-threadpool = ""
+threadpool = []
 
 CXX = os.environ.get("CXX")
 if CXX is None:
@@ -55,11 +55,10 @@ def compile(name: str, flags: list[str]):
             "-Wall",
             "-Wextra",
             "-Werror",
-            threadpool,
             "-o",
             f"{name}.out",
             file
-        ] + flags,
+        ] + flags + threadpool,
         stderr=subprocess.PIPE,
         stdout=subprocess.DEVNULL,
     )
@@ -148,7 +147,7 @@ flags = moduleflags()
 
 args = sys.argv[1:]
 if len(args) > 0 and args[0] == "-threadpool":
-    threadpool = "-DTHREADPOOL"
+    threadpool.append("-DTHREADPOOL")
     args = args[1:]
 
 if len(args) > 0:
