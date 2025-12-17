@@ -1,9 +1,9 @@
 # http [WIP]
 http is a lightweight, multi-threaded HTTP library written in C++, designed for simplicity and ease of integration. It facilitates handling HTTP requests and responses with no dependencies, making it ideal for applications requiring a straightforward HTTP interface.
 
-This library began as a personal exploration into how HTTP and HTTP parsing actually work under the hood. It isn’t designed for production use—there are plenty of mature and well-optimized HTTP libraries for C++ already. Instead, this project is a simple, hobby-level implementation built using basic TCP sockets, created purely for fun and for learning something new.
+This library began as a personal exploration into how HTTP and HTTP parsing actually work under the hood. It isn’t designed for production use, there are plenty of mature and well-optimized HTTP libraries for C++ already. Instead, this project is a simple, hobby-level implementation built using basic TCP sockets, created purely for fun and for learning something new.
 
-I wrote it without looking at how other HTTP libraries are implemented, so parts of it may be unconventional (or even wrong!)—but that’s part of the learning process. I continue to update it with small features and optimizations whenever I can.
+I wrote it without looking at how other HTTP libraries are implemented, so parts of it may be unconventional (or even wrong!), but that’s part of the learning process. I continue to update it with small features and optimizations whenever I can.
 
 If you find it useful for small home projects or want to tinker with the internals, feel free to try it out!
 
