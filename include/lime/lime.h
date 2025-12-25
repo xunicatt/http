@@ -1,3 +1,18 @@
+/*
+*
+*    _ _
+*    | (_)_ __ ___   ___
+*    | | | '_ ` _ \ / _ \
+*    | | | | | | | |  __/
+*    |_|_|_| |_| |_|\___|
+*
+*    [Li]ght Weight
+*    [M]ulti Threaded
+*    & [E]fficient
+*
+*/
+
+
 #ifndef LIME_H
 #define LIME_H
 

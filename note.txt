@@ -2,22 +2,38 @@ v2.0.0.er1 (early release)
 
 ** THIS IS AN EARLY RELEASE OF v2.0.0 **
 
-The project has been renamed from “http” to “lime”. This change was necessary as the original name became increasingly problematic and restrictive as the codebase grew. The name “http” is very generic, conflicts easily with other libraries and system identifiers, and no longer accurately represents the direction of the project.
+The project has been renamed from “http” to “lime”. This change was necessary as the original name became increasingly problematic
+and restrictive as the codebase grew. The name “http” is very generic, conflicts easily with other libraries and system identifiers,
+and no longer accurately represents the direction of the project.
 
-When this library started, it was purely an experiment to understand how HTTP works internally, so the name made sense at the time. However, as new modules such as JSON handling and a threadpool were added, keeping everything under a top-level “http” namespace started to look awkward and confusing. Non-HTTP functionality did not belong naturally inside an “http” project, and continuing in that direction would have made the design harder to maintain in the long run.
+When this library started, it was purely an experiment to understand how HTTP works internally, so the name made sense at the time.
+However, as new modules such as JSON handling and a threadpool were added, keeping everything under a top-level “http” namespace
+started to look awkward and confusing. Non-HTTP functionality did not belong naturally inside an “http” project, and continuing
+in that direction would have made the design harder to maintain in the long run.
 
-To solve this, the project has been restructured and renamed to “lime”. All public APIs are now rooted under the lime namespace, with HTTP functionality living under lime::http and supporting modules living directly under lime. This allows the project to grow in a cleaner and more modular way while keeping HTTP as the main focus.
+To solve this, the project has been restructured and renamed to “lime”. All public APIs are now rooted under the lime namespace,
+with HTTP functionality living under lime::http and supporting modules living directly under lime. This allows the project to grow
+in a cleaner and more modular way while keeping HTTP as the main focus.
 
-This rename introduces breaking changes. The repository name, build targets, include paths, and namespaces have all changed. Code that previously used http::Server, http::Router, or similar types must now use lime::http::Server, lime::http::Router, and so on. The main public header has also changed accordingly, and build system integration for both Meson and CMake must be updated to reference “lime” instead of “http”.
+This rename introduces breaking changes. The repository name, build targets, include paths, and namespaces have all changed.
+Code that previously used http::Server, http::Router, or similar types must now use lime::http::Server, lime::http::Router, and so on.
+The main public header has also changed accordingly, and build system integration for both Meson and CMake must be updated to reference
+“lime” instead of “http”.
 
-The internal project layout has been reorganized to better support modular development. This affects how the project is included as a subproject and how its targets are linked, but the overall usage pattern remains very similar once names are updated.
+The internal project layout has been reorganized to better support modular development. This affects how the project is included as a
+subproject and how its targets are linked, but the overall usage pattern remains very similar once names are updated.
 
-Another notable change is that the threadpool-based client handler is now enabled by default. Previously, threadpool support was optional or experimental. With this update, incoming clients are handled through the internal threadpool automatically, improving scalability and behavior under load without requiring any special build flags.
+Another notable change is that the threadpool-based client handler is now enabled by default. Previously, threadpool support was optional
+or experimental. With this update, incoming clients are handled through the internal threadpool automatically, improving scalability and
+behavior under load without requiring any special build flags.
 
-What has not changed is the intent of the project. Lime is still a lightweight, dependency-free, learning-oriented HTTP library. It is still not intended to compete with mature, production-grade frameworks, and simplicity and clarity remain the primary goals.
+What has not changed is the intent of the project. Lime is still a lightweight, dependency-free, learning-oriented HTTP library. It is still
+not intended to compete with mature, production-grade frameworks, and simplicity and clarity remain the primary goals.
 
-Looking forward, upcoming releases will focus on expanding functionality beyond the core server. Planned features include HTML templating support, HTTPS support, and an HTTP client implementation, along with continued internal cleanup and refinement.
+Looking forward, upcoming releases will focus on expanding functionality beyond the core server. Planned features include HTML templating
+support, HTTPS support, and an HTTP client implementation, along with continued internal cleanup and refinement.
 
-If you were already using the old “http” project, this update will require manual changes, but most of them are mechanical renames. The long-term benefit is a clearer structure, fewer conflicts, and a foundation that can support broader functionality without becoming messy.
+If you were already using the old “http” project, this update will require manual changes, but most of them are mechanical renames. The long-term
+benefit is a clearer structure, fewer conflicts, and a foundation that can support broader functionality without becoming messy.
 
 Thank you for using and experimenting with the project as it evolves.
