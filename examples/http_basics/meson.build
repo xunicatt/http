@@ -1,5 +1,5 @@
 project(
-  'http_basics',
+  'lime_basics',
   'cpp',
   default_options: [
     'cpp_std=c++23',
@@ -7,10 +7,10 @@ project(
   ],
 )
 
-http_dep = dependency('http', required: true)
+lime_dep = dependency('lime', required: true)
 
 executable(
   meson.project_name(),
   'main.cc',
-  dependencies: [http_dep],
+  dependencies: [ lime_dep ],
 )

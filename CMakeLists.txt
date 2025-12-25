@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.14)
-project(http VERSION 1.4.0 LANGUAGES CXX)
+project(lime VERSION 2.0.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -8,36 +8,39 @@ add_compile_options(-Wall -Wextra -Werror)
 
 set(
   SOURCES
-  src/json.cc
-  src/logger.cc
-  src/parser.cc
-  src/router.cc
-  src/server.cc
-  src/types.cc
-  src/threadpool.cc
+  src/http/methods.cc
+  src/http/request.cc
+  src/http/response.cc
+  src/http/router.cc
+  src/http/server.cc
+  src/http/status.cc
+  src/json/json.cc
+  src/json/parser.cc
+  src/threadpool/threadpool.cc
+  src/utils/logger.cc
 )
 
-add_library(http STATIC ${SOURCES})
-target_include_directories(http PUBLIC include)
+add_library(lime STATIC ${SOURCES})
+target_include_directories(lime PUBLIC include)
 
 # Install library and headers
 install(
-  TARGETS http
-  EXPORT httpTargets
+  TARGETS lime
+  EXPORT limeTargets
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
 )
 
 install(
-  DIRECTORY include/
-  DESTINATION include/http
+  DIRECTORY include
+  DESTINATION include
   FILES_MATCHING PATTERN "*.h"
 )
 
 # Generate pkg-config file
-configure_file(http.pc.in http.pc @ONLY)
+configure_file(lime.pc.in lime.pc @ONLY)
 install(
-  FILES ${CMAKE_BINARY_DIR}/http.pc
+  FILES ${CMAKE_BINARY_DIR}/lime.pc
   DESTINATION lib/pkgconfig
 )

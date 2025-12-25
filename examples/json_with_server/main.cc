@@ -1,10 +1,11 @@
 #include <print>
 #include <cstring>
-#include <http.h>
+#include <lime/lime.h>
+
+namespace http = lime::http;
+namespace json = lime::json;
 
 http::Response user(const http::Request& req) {
-  namespace json = http::json;
-
   if(!req.header.contains("Content-Type")) {
     return http::StatusCode::BadRequest;
   }

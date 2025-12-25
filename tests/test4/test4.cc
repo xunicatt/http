@@ -1,7 +1,9 @@
 #include <cstring>
-#include <http.h>
+#include <lime/lime.h>
 
 int main() {
+  namespace http = lime::http;
+
   http::Router router;
   router.add("/user", http::Method::Post, [](const http::Request& req) {
     if(!req.params.contains("username")) {

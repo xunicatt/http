@@ -1,5 +1,7 @@
 #include <print>
-#include <http.h>
+#include <lime/lime.h>
+
+namespace json = lime::json;
 
 static void encoding();
 static void decoding();
@@ -10,7 +12,6 @@ int main() {
 }
 
 void encoding() {
-  namespace json = http::json;
   // json encoding
   json::Node root_node = json::Object{
     // key - value
@@ -49,8 +50,6 @@ void encoding() {
 }
 
 void decoding() {
-  // json decoding
-  namespace json = http::json;
   std::string data = R"({
     "user-name": "Bill",
     "active-since": "10-04-2021",

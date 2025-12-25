@@ -1,7 +1,7 @@
 project(
-  'http',
+  'lime',
   'cpp',
-  version: '1.4.0',
+  version: '2.0.0',
   default_options: [
     'cpp_std=c++23',
     'cpp_flags=-Wall -Werror -Wextra',
@@ -11,16 +11,19 @@ project_description = 'simple and lightweight web framework for C++'
 
 incdir = include_directories('include')
 srcs = files(
-  'src/json.cc',
-  'src/logger.cc',
-  'src/parser.cc',
-  'src/router.cc',
-  'src/server.cc',
-  'src/types.cc',
-  'src/threadpool.cc',
+  'src/http/methods.cc',
+  'src/http/request.cc',
+  'src/http/response.cc',
+  'src/http/router.cc',
+  'src/http/server.cc',
+  'src/http/status.cc',
+  'src/json/json.cc',
+  'src/json/parser.cc',
+  'src/threadpool/threadpool.cc',
+  'src/utils/logger.cc',
 )
 
-http = static_library(
+lime = static_library(
   meson.project_name(),
   srcs,
   include_directories: incdir,
@@ -33,26 +36,44 @@ if not meson.is_subproject()
     name: meson.project_name(),
     description: project_description,
     version: meson.project_version(),
-    libraries: http,
+    libraries: lime,
     subdirs: meson.project_name(),
     install_dir: get_option('libdir') / 'pkgconfig',
   )
 
   install_headers(
-    'include/http.h',
-    'include/logger.h',
-    'include/methods.h',
-    'include/router.h',
-    'include/server.h',
-    'include/status.h',
-    'include/types.h',
-    'include/json.h',
-    'include/threadpool.h',
+    'include/lime/lime.h',
     subdir: meson.project_name(),
+  )
+
+  install_headers(
+    'include/lime/http/http.h',
+    'include/lime/http/methods.h',
+    'include/lime/http/request.h',
+    'include/lime/http/response.h',
+    'include/lime/http/router.h',
+    'include/lime/http/server.h',
+    'include/lime/http/status.h',
+    subdir: meson.project_name() + '/http/',
+  )
+
+  install_headers(
+    'include/lime/json/json.h',
+    subdir: meson.project_name() + '/json/',
+  )
+
+  install_headers(
+    'include/lime/threadpool/threadpool.h',
+    subdir: meson.project_name() + '/threadpool/',
+  )
+
+  install_headers(
+    'include/lime/utils/logger.h',
+    subdir: meson.project_name() + '/utils/',
   )
 endif
 
-http_dep = declare_dependency(
+lime_dep = declare_dependency(
   include_directories: include_directories('include'),
-  link_with: http,
+  link_with: lime,
 )

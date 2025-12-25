@@ -2,12 +2,14 @@
 #include <cerrno>
 #include <print>
 #include <cstring>
-#include <http.h>
+#include <lime/lime.h>
 
 int main() {
+  namespace http = lime::http;
+
   // set log level
   // LogLevel::INFO is default
-  http::loglevel(http::LogLevel::Info);
+  lime::loglevel(lime::LogLevel::Info);
   http::Router router;
 
   router.add("/", http::Method::Get, [](const http::Request& req) {

@@ -1,8 +1,10 @@
 #include <cstring>
 #include <print>
-#include <http.h>
+#include <lime/lime.h>
 
 int main() {
+  namespace http = lime::http;
+
   http::Router router;
   router.add("/", http::Method::Get, [](const http::Request&){
     return http::Response("Hello, World!");

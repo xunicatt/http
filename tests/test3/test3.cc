@@ -1,7 +1,9 @@
 #include <cstring>
-#include <http.h>
+#include <lime/lime.h>
 
 int main() {
+  namespace http = lime::http;
+
   http::Router router;
   router.add_regex("/user/[0-9]", http::Method::Get, [](const http::Request& req) {
     const auto id = req.segments().back();

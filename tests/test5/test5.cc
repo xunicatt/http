@@ -1,6 +1,9 @@
 #include <cstdint>
-#include <http.h>
+#include <lime/lime.h>
 #include <cstring>
+
+namespace http = lime::http;
+namespace json = lime::json;
 
 static constexpr int generate_otp() {
   // INFO: to validate the output using test
@@ -9,8 +12,6 @@ static constexpr int generate_otp() {
 }
 
 static http::Response get_otp(const http::Request& req)  {
-  namespace json = http::json;
-
   if(!req.params.contains("name")) {
     return http::StatusCode::BadRequest;
   }
@@ -24,8 +25,6 @@ static http::Response get_otp(const http::Request& req)  {
 }
 
 static http::Response validate_otp(const http::Request& req) {
-  namespace json = http::json;
-
   const auto res = json::decode(req.body);
   if(!res.has_value()) {
     return http::Response(

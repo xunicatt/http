@@ -1,5 +1,5 @@
-# http [WIP]
-http is a lightweight, multi-threaded HTTP library written in C++, designed for simplicity and ease of integration. It facilitates handling HTTP requests and responses with no dependencies, making it ideal for applications requiring a straightforward HTTP interface.
+# lime [WIP]
+lime is a lightweight, multi-threaded HTTP library written in C++, designed for simplicity and ease of integration. It facilitates handling HTTP requests and responses with no dependencies, making it ideal for applications requiring a straightforward HTTP interface.
 
 This library began as a personal exploration into how HTTP and HTTP parsing actually work under the hood. It isn’t designed for production use, there are plenty of mature and well-optimized HTTP libraries for C++ already. Instead, this project is a simple, hobby-level implementation built using basic TCP sockets, created purely for fun and for learning something new.
 
@@ -19,27 +19,27 @@ If you find it useful for small home projects or want to tinker with the interna
 - Json: Builtin json moudle allows easy encoding and decoding.
 
 ## Routing
-`http::Router` allows `http::Server` to handle multiple routes and also supports regex pattern matching to resolve them.
+`lime::http::Router` allows `lime::http::Server` to handle multiple routes and also supports regex pattern matching to resolve them.
 
 ### Example
 ```cpp
-http::Router router;
+lime::http::Router router;
 router.add(
   "/",
-  http::Method::Get,
-  [](const http::Request& req) {
-    return http::Response("Hello, World!");
+  lime::http::Method::Get,
+  [](const lime::http::Request& req) {
+    return lime::http::Response("Hello, World!");
   }
 );
 
 // with regex
 router.add_regex(
   "/user/.+$",
-  http::Method::Get,
-  [](const http::Request& req) {
+  lime::http::Method::Get,
+  [](const lime::http::Request& req) {
     // get the last token in url path /user/.../<name>
     const auto username = req.segments().back();
-    return http::Response(std::format("Hi {}", username));
+    return lime::http::Response(std::format("Hi {}", username));
   }
 );
 
@@ -47,24 +47,24 @@ router.add_regex(
 // uname=xunicatt
 router.add(
   "/user",
-  http::Method::Get,
-  [](const http::Request& req) {
+  lime::http::Method::Get,
+  [](const lime::http::Request& req) {
     if(!req.params.contains("uname")) {
-      return http::Response(http::StatusCode::BadRequest);
+      return lime::http::Response(lime::http::StatusCode::BadRequest);
     }
 
     const auto& uname = req.param.at("uname");
-    return http::Response(std::format("Hi {}", uname));
+    return lime::http::Response(std::format("Hi {}", uname));
   }
 );
 ```
 
 ## Server
-`http::Server` accepts an `http::Router` to handle various routes and manages clients using multiple threads. It is responsible for setting up the socket and binding the address and port.
+`lime::http::Server` accepts an `lime::http::Router` to handle various routes and manages clients using multiple threads. It is responsible for setting up the socket and binding the address and port.
 
 ### Example
 ```cpp
-http::Server server(router);
+lime::http::Server server(router);
 if(server.port(8080).run() < 0) {
   // error
   // errno is set
@@ -74,7 +74,7 @@ if(server.port(8080).run() < 0) {
 ## Build & Install
 ### Requirements:
 - C++23
-- meson
+- meson/cmake
 - linux/macos
 
 ### System Wide:
@@ -93,18 +93,18 @@ sudo make install
 ```
 
 ### As a Meson Project:
-To use `http` as a meson subproject we have to make a project structure like this:
+To use `lime` as a meson subproject we have to make a project structure like this:
 - meson.build
 - main.cc
 - subprojects/
-  - http/
+  - lime/
 
 ```bash
 mkdir <project-name>
 cd $_
 touch main.cc meson.build
 mkdir subprojects
-git clone https://github.com/xunicatt/http.git ./subprojects/http
+git clone https://github.com/xunicatt/lime.git ./subprojects/lime
 ```
 
 meson.build:
@@ -118,13 +118,13 @@ project(
   ],
 )
 
-http = subproject('http')
+lime = subproject('lime')
 
 executable(
   meson.project_name(),
   'main.cc',
   dependencies: [
-    http.get_variable('http_dep'),
+    lime.get_variable('lime_dep'),
   ],
 )
 ```
@@ -142,17 +142,19 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 add_compile_options(-Wall -Wextra -Werror)
 
-add_subdirectory(subprojects/http)
+add_subdirectory(subprojects/lime)
 add_executable(example main.cc)
-target_link_libraries(example PRIVATE http)
+target_link_libraries(example PRIVATE lime)
 ```
 
 main.cc:
 ```cpp
-#include <http.h>
+#include <lime/lime.h>
 #include <cstring>
 
 int main() {
+  namespace http = lime::http;
+
   http::Router router;
   router.add("/", http::Method::Get, [](const http::Request& req){
     return http::Response("Hello, World!");
@@ -187,17 +189,15 @@ make
 ```
 
 ## Modules:
-- json (stable): available directly by using "http::json" namespace
+- json (stable): available directly by using "lime::json" namespace
+- threadpool (stable): available directly by using "lime::DynamicThreadPool"
 
 ## Experimental Modules
 > [!WARNING]
 > EXPERIMENTAL MODULES ARE NOT READY FOR GENERAL USE. THESE MODULES MAY HAVE INCOMPLETE FEATURES AND ARE SUBJECT TO CHANGE OR BREAK AT ANY TIME.
 
-### Threadpool
-To use threadpool version of the library you have to enable `THREADPOOL` flag by using:
-```bash
-meson setup build -Dhttp:cpp_args="-DTHREADPOOL" -Dcpp_args="-DTHREADPOOL"
-```
-
 ## Docs
 Checkout `example/` directory for project integration and example.
+
+> [!INFO]
+> This project was previously named http and has been renamed to lime to avoid generic naming conflicts and to better reflect the broader scope of the codebase. As the project grew beyond a simple HTTP experiment to include additional modules such as JSON and a threadpool, keeping everything under the http name and namespace became limiting. This rename introduces breaking changes, including updated namespaces, include paths, build targets, and a reorganized project structure. The internal threadpool is now used as the default client handler. HTTP remains the primary focus of the project, with future releases planned to add features such as templating, HTTPS support, and an HTTP client.

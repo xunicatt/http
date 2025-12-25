@@ -6,5 +6,5 @@ includedir=${prefix}/include
 Name: http
 Description: simple and lightweight web framework for C++
 Version: @PROJECT_VERSION@
-Libs: -L${libdir} -lhttp
-Cflags: -I${includedir}/http
+Libs: -L${libdir} -llime
+Cflags: -I${includedir}/lime
