@@ -199,5 +199,5 @@ make
 ## Docs
 Checkout `example/` directory for project integration and example.
 
-> [!INFO]
+> [!NOTE]
 > This project was previously named http and has been renamed to lime to avoid generic naming conflicts and to better reflect the broader scope of the codebase. As the project grew beyond a simple HTTP experiment to include additional modules such as JSON and a threadpool, keeping everything under the http name and namespace became limiting. This rename introduces breaking changes, including updated namespaces, include paths, build targets, and a reorganized project structure. The internal threadpool is now used as the default client handler. HTTP remains the primary focus of the project, with future releases planned to add features such as templating, HTTPS support, and an HTTP client.
