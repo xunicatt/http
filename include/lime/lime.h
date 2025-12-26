@@ -26,15 +26,15 @@ namespace lime {
     inline constexpr uint8_t Major = 2;
     inline constexpr uint8_t Minor = 0;
     inline constexpr uint8_t Patch = 0;
-    inline constexpr uint8_t Roll  = 0;
+    inline constexpr uint8_t EarlyRelease = 1;
 
     [[nodiscard]]
     constexpr inline std::string to_string() {
-      if (Roll == 0) {
+      if (EarlyRelease == 0) {
         return std::format("v{}.{}.{}", Major, Minor, Patch);
       }
 
-      return std::format("v{}.{}.{}.{} (rolling)", Major, Minor, Patch, Roll);
+      return std::format("v{}.{}.{}.{} (early release)", Major, Minor, Patch, EarlyRelease);
     }
   } // verion
 } // lime

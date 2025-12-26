@@ -36,7 +36,7 @@ namespace lime {
     >;
 
     class Node {
-      public:
+    public:
       // to keep backwards compatibility
       // Node constructor with int is left out
       // as an option
@@ -93,7 +93,7 @@ namespace lime {
       [[nodiscard]]
       std::string to_string() const;
 
-      private:
+    private:
       Data     m_data;
       NodeType m_type;
     };

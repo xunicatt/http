@@ -2,7 +2,7 @@
 #include <print>
 
 namespace lime {
-  static LogLevel s_level = LogLevel::Info;
+  static LogLevel s_level { LogLevel::Info };
 
   void loglevel(const LogLevel& level) {
     s_level = level;

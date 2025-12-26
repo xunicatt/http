@@ -6,9 +6,9 @@
 namespace lime {
   namespace http {
     std::vector<std::string> Request::segments() const {
-      std::vector<std::string> result;
-      std::stringstream ss(url);
-      std::string token;
+      std::vector<std::string> result {};
+      std::stringstream ss {url};
+      std::string token {};
 
       while (std::getline(ss, token, '/')) {
         if (!token.empty()) {

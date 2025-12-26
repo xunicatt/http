@@ -29,15 +29,13 @@ namespace lime {
     std::string to_string(const Token&);
 
     struct ScannerLocation {
-      size_t cursor;
-      size_t row;
-      size_t lnbeg;
-
-      ScannerLocation();
+      size_t cursor = 0;
+      size_t row = 0;
+      size_t lnbeg = 0;
     };
 
     class Scanner {
-      public:
+    public:
       Scanner(const std::string&);
       template <typename T>
       [[nodiscard]]
@@ -47,7 +45,7 @@ namespace lime {
       [[nodiscard]]
       const ScannerLocation& location() const;
 
-      private:
+    private:
       void forward();
       [[nodiscard]]
       bool is_end() const;
@@ -70,12 +68,12 @@ namespace lime {
     }
 
     class Parser {
-      public:
+    public:
       Parser(Scanner&);
       [[nodiscard]]
       std::expected<Node, std::string> parse(bool fetch = true);
 
-      private:
+    private:
       [[nodiscard]]
       std::expected<Node, std::string> object();
       [[nodiscard]]

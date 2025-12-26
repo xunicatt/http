@@ -12,13 +12,13 @@
 
 namespace lime {
   class DynamicThreadPool {
-    public:
+  public:
     explicit DynamicThreadPool(size_t max_workers = std::thread::hardware_concurrency());
     ~DynamicThreadPool();
     void enqueue(std::function<void()>);
     void shutdown();
 
-    private:
+  private:
     void worker(const size_t id, std::stop_token);
 
     std::vector<std::jthread>         m_workers;

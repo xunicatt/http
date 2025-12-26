@@ -11,7 +11,7 @@ namespace lime {
     using Header = std::unordered_map<std::string, std::string>;
 
     struct Response {
-      public:
+    public:
       /*
       * @brief Create http reponse with http::StatusOk and the given message.
       * @param body Body of the http response.
@@ -57,7 +57,7 @@ namespace lime {
       [[nodiscard]]
       std::string to_string() const;
 
-      private:
+    private:
       std::string m_body;
       StatusCode  m_code;
       Header      m_header;

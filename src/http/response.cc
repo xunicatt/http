@@ -1,4 +1,5 @@
 #include <format>
+#include <lime/http/request.h>
 #include <string>
 #include <lime/lime.h>
 
@@ -8,25 +9,35 @@
 
 namespace lime {
   namespace http {
-    static void set_default_header_fields(http::Header&);
-    [[nodiscard]]
-    static std::string header_to_string(const http::Header&);
+    namespace header {
+      static void set_defaults(http::Header& header) {
+        header.insert({ "Connection", "Close" });
+      }
+
+      [[nodiscard]]
+      static std::string to_string(const http::Header& header) {
+        std::string res {};
+        for (const auto& [k, v]: header)
+          res += std::format("{}: {}\n", k, v);
+        return res;
+      }
+    } // header
 
     Response::Response(const std::string& body)
     : m_body(body), m_code(StatusCode::Ok) {
-      set_default_header_fields(m_header);
+      header::set_defaults(m_header);
       append_header("Content-Length", std::to_string(body.size()));
     }
 
     Response::Response(const StatusCode& code)
     : m_body(""), m_code(code) {
-      set_default_header_fields(m_header);
+      header::set_defaults(m_header);
       append_header("Content-Length", std::to_string(0));
     }
 
     Response::Response(const std::string& body, const StatusCode& code)
     : m_body(body), m_code(code) {
-      set_default_header_fields(m_header);
+      header::set_defaults(m_header);
       append_header("Content-Length", std::to_string(body.size()));
     }
 
@@ -47,20 +58,9 @@ namespace lime {
         HTTP_VERSION" {} {}\n{}\r\n{}",
         static_cast<int>(m_code),
         http::to_string(m_code),
-        header_to_string(m_header),
+        header::to_string(m_header),
         m_body
       );
-    }
-
-    void set_default_header_fields(http::Header& header) {
-      header.insert({"Connection", "Close"});
-    }
-
-    std::string header_to_string(const http::Header& header) {
-      std::string res;
-      for (const auto& [k, v]: header)
-        res += std::format("{}: {}\n", k, v);
-      return res;
     }
   } // http
 } // lime

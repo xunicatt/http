@@ -23,22 +23,28 @@
 
 namespace lime {
   namespace http {
-    struct SignalHandler {
-      std::mutex mut;
-      bool       close_intp;
-    };
+    namespace signal_handler {
+      struct SignalHandler {
+        std::mutex mut = {};
+        bool close_intp = false;
+      };
 
-    static SignalHandler s_signal_handler { .mut = {}, .close_intp = false };
-    static void signal_handler_func(int);
+      static SignalHandler instance {};
+      static void handler(int) {
+        info("received shutdown signal");
+        std::lock_guard<std::mutex> guard { signal_handler::instance.mut };
+        signal_handler::instance.close_intp = true;
+      }
+    } // signal_handler
 
     Server::Server(const Router& router, const size_t max_workers)
     : m_router(router),
-    m_port(8080),
-    m_addrs("0.0.0.0"),
-    m_pool(DynamicThreadPool(max_workers))
+      m_port(8080),
+      m_addrs("0.0.0.0"),
+      m_pool(DynamicThreadPool { max_workers } )
     {
       debug("registering signal interupt handler");
-      if (signal(SIGINT, signal_handler_func) == SIG_ERR) {
+      if (signal(SIGINT, signal_handler::handler) == SIG_ERR) {
         perror(strerror(errno));
         exit(1);
       }
@@ -65,8 +71,8 @@ namespace lime {
     int Server::run() {
       info(std::format("libhttp version: {}", lime::version::to_string()));
 
-      int ret = 0;
-      const int optval = 1;
+      int ret { 0 };
+      const int optval { 1 };
 
       if (m_socket = socket(AF_INET, SOCK_STREAM, 0); m_socket < 0) {
         return m_socket;
@@ -84,7 +90,7 @@ namespace lime {
       }
       debug("set socket options");
 
-      int flags = fcntl(m_socket, F_GETFL, 0);
+      int flags { fcntl(m_socket, F_GETFL, 0) };
       fcntl(m_socket, F_SETFL, flags | O_NONBLOCK);
 
       m_addr = (sockaddr_in){
@@ -114,9 +120,9 @@ namespace lime {
       debug("starting accept loop in a separate thread");
       m_accept_thread = std::jthread([this](std::stop_token stoken) {
         while (!stoken.stop_requested()) {
-          sockaddr_in addr = {};
-          socklen_t len = sizeof(addr);
-          int client = accept(m_socket, (sockaddr*)&addr, &len);
+          sockaddr_in addr {};
+          socklen_t len { sizeof(addr) };
+          int client { accept(m_socket, (sockaddr*)&addr, &len) };
           debug("connected to a client");
 
           if (client < 0) {
@@ -137,7 +143,7 @@ namespace lime {
 
           debug("enqueuing new client handler into the queue");
           m_pool.enqueue([router = std::cref(m_router), client = client]() {
-            const std::string res = router.get().handle(client);
+            const std::string res { router.get().handle(client) };
 
             write(client, res.c_str(), res.length());
             debug("sent response to client");
@@ -158,12 +164,12 @@ namespace lime {
       info(std::format("started server on port: {}", m_port));
 
       while (true) {
-      { /* mutex is scoped to call unlock at the end of scope */
-        std::lock_guard<std::mutex> guard(s_signal_handler.mut);
-        if(s_signal_handler.close_intp) break;
-      }
+        { /* mutex is scoped to call unlock at the end of scope */
+          std::lock_guard<std::mutex> guard { signal_handler::instance.mut };
+          if(signal_handler::instance.close_intp) break;
+        }
 
-      std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
       }
 
       info("shutting down");
@@ -179,12 +185,6 @@ namespace lime {
       m_pool.shutdown();
 
       return 0;
-    }
-
-    void signal_handler_func(int) {
-      info("received shutdown signal");
-      std::lock_guard<std::mutex> guard(s_signal_handler.mut);
-      s_signal_handler.close_intp = true;
     }
   } // http
 } // lime

@@ -25,9 +25,6 @@ namespace lime {
       }
     }
 
-    ScannerLocation::ScannerLocation()
-    : cursor(0), row(0), lnbeg(0) {}
-
     Scanner::Scanner(const std::string& data)
     : m_data(data) {}
 
@@ -79,7 +76,7 @@ namespace lime {
 
       m_lastloc = m_loc;
 
-      Token t = Token::None;
+      Token t { Token::None };
       switch (curr_char()) {
         case '{':
         t = Token::LeftBrace;
@@ -108,7 +105,7 @@ namespace lime {
 
       if (std::isdigit(curr_char()) ||
         (curr_char() == '-' && std::isdigit(peek_char()))) {
-          bool is_float = false;
+          bool is_float { false };
           if (curr_char() == '-') {
             forward();
           }
@@ -188,7 +185,7 @@ namespace lime {
 
     std::expected<Node, std::string> Parser::array() {
       Array array;
-      auto token = m_sc.token();
+      auto token { m_sc.token() };
 
       if (!token) {
         return std::unexpected(token.error());
@@ -200,7 +197,7 @@ namespace lime {
       }
 
       while (true) {
-        const auto& node = parse(false);
+        const auto& node { parse(false) };
         if (!node) {
           return node;
         }
@@ -230,7 +227,7 @@ namespace lime {
 
     std::expected<Node, std::string> Parser::object() {
       Object object;
-      auto token = m_sc.token();
+      auto token { m_sc.token() };
       if (!token) {
         return std::unexpected(token.error());
       }
@@ -255,7 +252,7 @@ namespace lime {
           return fmterror("expected ':'", m_sc.location());
         }
 
-        const auto& node = parse();
+        const auto& node { parse() };
         if (!node) {
           return node;
         }
@@ -286,7 +283,7 @@ namespace lime {
 
     std::expected<Node, std::string> Parser::parse(bool fetch) {
       if (fetch) {
-        auto token = m_sc.token();
+        auto token { m_sc.token() };
         if (!token) {
           return std::unexpected(token.error());
         }
