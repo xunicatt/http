@@ -1,5 +1,5 @@
 #include <print>
-#include <lime/lime.h>
+#include <lime.h>
 
 namespace json = lime::json;
 

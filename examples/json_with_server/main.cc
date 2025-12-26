@@ -1,6 +1,6 @@
 #include <print>
 #include <cstring>
-#include <lime/lime.h>
+#include <lime.h>
 
 namespace http = lime::http;
 namespace json = lime::json;
