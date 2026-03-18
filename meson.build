@@ -14,7 +14,6 @@ project_description = 'simple and lightweight web framework for C++'
 
 incdir = include_directories('include')
 srcs = files(
-
   'src/clime/http/methods.cc',
   'src/clime/http/request.cc',
   'src/clime/http/response.cc',
