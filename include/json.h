@@ -15,6 +15,7 @@ namespace json {
 class Node;
 
 enum class NodeType {
+  Null,
   Int,
   Float,
   Bool,
@@ -29,6 +30,7 @@ std::string to_string(const NodeType&);
 using Array = std::vector<Node>;
 using Object = std::unordered_map<std::string, Node>;
 using Data = std::variant<
+  std::monostate,
   int64_t,
   double,
   bool,
@@ -39,6 +41,7 @@ using Data = std::variant<
 
 class Node {
 public:
+  Node();
   // to keep backwards compatibility
   // Node constructor with int is left out
   // as an option

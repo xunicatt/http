@@ -9,6 +9,9 @@ static std::string data_to_string(const json::Data&);
 
 namespace http {
 namespace json {
+Node::Node()
+: m_type(NodeType::Null) {}
+
 Node::Node(const int& data)
 : m_data(data), m_type(NodeType::Int) {}
 
@@ -63,6 +66,9 @@ std::expected<Node, std::string> decode(const std::string& data) {
 
 std::string data_to_string(const http::json::Data& data) {
   switch (static_cast<json::NodeType>(data.index())) {
+    case json::NodeType::Null:
+      return "null";
+
     case json::NodeType::Int:
       return std::to_string(std::get<int64_t>(data));
 

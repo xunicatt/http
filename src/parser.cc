@@ -17,6 +17,7 @@ std::string to_string(const Token& t) {
     case Token::RightBracket: return "]";
     case Token::Colon:        return ":";
     case Token::Comma:        return ",";
+    case Token::Null:         return "null";
     case Token::Int:          return "int";
     case Token::Float:        return "float";
     case Token::Bool:         return "bool";
@@ -145,12 +146,22 @@ std::expected<Token, std::string> Scanner::token() {
       m_lastloc.cursor,
       m_loc.cursor - m_lastloc.cursor
     );
-    if (ident != "true" && ident != "false") {
-      return Token::Invalid;
+
+    if (ident == "null") {
+      return Token::Null;
     }
 
-    m_value = ident == "true";
-    return Token::Bool;
+    if (ident == "true") {
+      m_value = true;
+      return Token::Bool;
+    }
+
+    if (ident == "false") {
+      m_value = false;
+      return Token::Bool;
+    }
+
+    return Token::Invalid;
   }
 
   // TODO: handling escape characters like \n \t in string
@@ -297,6 +308,9 @@ std::expected<Node, std::string> Parser::parse(bool fetch) {
 
 
   switch (m_token) {
+    case Token::Null:
+      return Node();
+
     case Token::LeftBrace:
       return object();
 

@@ -13,6 +13,7 @@ enum class Token {
   None,
   EndOfFile,
   Invalid,
+  Null,
   Int,
   Float,
   Bool,

@@ -14,10 +14,12 @@ paths = [
     "test3",
     "test4",
     "test5",
+    "test6",
 ]
 
 isjson = {
-    "test5": True,
+    "test5",
+    "test6",
 }
 
 threadpool = []
