@@ -1,0 +1,1 @@
+{"person": {"id": 123, "name": "John Smith"}, "data": {"skills": ["Painting", "Programming"], "languages": ["C", "C++", "Rust"]}}

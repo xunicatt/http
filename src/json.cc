@@ -9,6 +9,9 @@ static std::string data_to_string(const json::Data&);
 
 namespace http {
 namespace json {
+
+Encode::~Encode() {}
+
 Node::Node()
 : m_type(NodeType::Null) {}
 
@@ -52,8 +55,16 @@ std::string Node::to_string() const {
   return data_to_string(m_data);
 }
 
+Node Node::encode() const {
+  return *this;
+}
+
 std::string encode(const Node& node) {
   return node.to_string();
+}
+
+std::string encode(const Encode& node) {
+  return node.encode().to_string();
 }
 
 std::expected<Node, std::string> decode(const std::string& data) {
@@ -89,6 +100,7 @@ std::string data_to_string(const http::json::Data& data) {
         if (i < arr.size() - 1) {
           res += ", ";
         }
+        i++;
       }
       res += "]";
       return res;

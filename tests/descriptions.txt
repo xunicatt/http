@@ -5,3 +5,4 @@
 + test4: Tests parameter passing using url with error handling
 + test5: Tests the basic operations of 'http::json'
 + test6: Tests null fields in 'http::json'
++ test7: Tests 'http::json::Encode' interface

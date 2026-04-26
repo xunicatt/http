@@ -14,13 +14,13 @@ inline constexpr uint8_t __HTTP_VERSION_MAJ__ = 1;
 [[deprecated("Use http::ver::Minor instead")]]
 inline constexpr uint8_t __HTTP_VERSION_MIN__ = 5;
 [[deprecated("Use http::ver::Patch instead")]]
-inline constexpr uint8_t __HTTP_VERSION_PTC__ = 1;
+inline constexpr uint8_t __HTTP_VERSION_PTC__ = 2;
 
 namespace http {
 namespace ver {
   inline constexpr uint8_t Major = 1;
   inline constexpr uint8_t Minor = 5;
-  inline constexpr uint8_t Patch = 1;
+  inline constexpr uint8_t Patch = 2;
   inline constexpr uint8_t Roll  = 0;
 
   [[nodiscard]]

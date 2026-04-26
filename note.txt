@@ -1,59 +1,25 @@
-v1.4.0
+v1.5.2
 
-> change log from v1.3.9 -> v1.4.0
+This is a special release to bring good stuffs (backported) from early releases of v2.x.x to v1.x.x.
+As the new release v2.x.x is not ready yet, I thought down-streaming some of the features and bug fixes to keep v1.x.x up-to-date.
+
+> change log from v1.4.0 -> v1.5.2
 
 added:
-- added new threadpool for performance improvement, which can be enable by passing THREADPOOL define ( -DTHREADPOOL )
-- added #! (shebang) in tests/test.py
-- added new non blocking flags to socket for threadpool
-- accept_thread instance is now stored in m_accept_thread member varaible
-- added new check in m_accept_thread for non blocking accept
-- added a new flag '-threadpool' to the 'tests/test.py' script to test threadpool version of the library
-- added new 'isjson' dictionary in 'tests/test.py' script to store tests that has answers in json format
+- added "null" support in http::json
+- added a new test (test6) to test "null" implementation
+- added a new test (test7) to test http::json::Encode interface
+- added http::json::Encode interface to allow custom structs to get encoded using http::json::encode (see test7 for example)
 
-fixes:
-- fixed a BUG in json parser which allowd new lines in a json string literal
-- typo in to_string function for Token
-- fixed a bug where C style static array in a function is only zero initialized one time
-- fixed http::BadRequest -> http::StatusCode::BadRequest in tests/test5
-- fixed typo in README.md for http::HttpStatusCode -> http::StatusCode
-- fixed tests might fail due to mismatch of order of keys, because of std::unordered_map
+updated:
+- updated server to use threadpool (default and only option) [from my testing (while developing v2.x.x) it is quite stable and better]
 
-changes:
-- minor improvement in the overall implementation of Json Scanner (Lexer) and error handling
-- minor code style and semantic changes and overall improvement
-- changed http::StatusCode from enum to enum class
-- changed http::Server constructor to explicit
-- moved http::json structures definition from 'include/types.h' -> 'include/json.h'
-- changed '_' (underscore) prefix notation for private member variables to 'm_' prefix notation to avoid name collison and better readability
-- changed 'trim' lambda function variable to const in 'parse_header_line' function
-- accept thread in server now explicitly requested to stop and join if joinable
-- checks for error code returned by shutdown and close in server are removed to ignore unnecessary errors
+fixed:
+- fixed a major bug in json parsing for array which added trailing commas
 
-updates:
-- updated CLIENT_MAX_QUEUE_SIZE to 512
-- updated http::Server to accept an optional argument for number of worker threads
-- updated CLIENT_POLLING_TIMEOUT to 50ms
-- updated http::is_informational, http::is_successful, http::is_redirection, http::is_client_error, http::is_server_error and http::is_error functions to static inline functions
-- updated http::json::Node::get method to inline
-- updated http::json::Scanner::get method to inline
-- http::Server has now two types of constructor that gets enabled based on if THREADPOOL is defined or not
-- library now logs the version with rolling mentioned when http::Server::run is called
-- updated global static variable names with 's_' prefix notation
-- updated header file 'http/http.h' -> 'http.h' in 'examples/json_with_server'
-
-deprecated:
-- macros:
-  __HTTP_VERSION_MAJ__ -> http::ver::Major
-  __HTTP_VERSION_MIN__ -> http:ver::Minor
-  __HTTP_VERSION_PTC__ -> http::ver::Patch
-
-- functions:
-  http::version -> http::ver::to_string
+removed:
+- removed previous implementation to handle clients
+- removed threadpool handling from tests/test.py script
 
 known issue:
 - library when compiled with clang causes linking issue (macos only with clang++)
-
-info:
-- when linking with the library if threadpool is enabled, the user must pass -DTHREADPOOL flag to the compiler
-- in the upcoming major version release(v2.x.x) THREADPOOL will be used as the default client handler for better performance and reliability

@@ -39,7 +39,12 @@ using Data = std::variant<
   Object
 >;
 
-class Node {
+struct Encode {
+  virtual ~Encode();
+  virtual Node encode() const = 0;
+};
+
+class Node : public Encode {
 public:
   Node();
   // to keep backwards compatibility
@@ -91,6 +96,8 @@ public:
   [[nodiscard]]
   const T& get() const;
 
+  Node encode() const override;
+
   /*
   * @brief Converts a node to equivalent json string.
   * @return Json String format of the node.
@@ -119,6 +126,9 @@ inline const T& Node::get() const {
 */
 [[nodiscard]]
 std::string encode(const Node&);
+
+[[nodiscard]]
+std::string encode(const Encode&);
 
 /*
 * @brief Decode the given json string to equivalent json Node.

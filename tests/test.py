@@ -15,11 +15,13 @@ paths = [
     "test4",
     "test5",
     "test6",
+    "test7",
 ]
 
 isjson = {
     "test5",
     "test6",
+    "test7",
 }
 
 CXX = os.environ.get("CXX")
