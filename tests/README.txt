@@ -10,7 +10,7 @@ This script tests the functionality of the library as a single unit.
 -- How to add a Test?
 + Each test directory should be named as: test<number>/
   It must contain the following files:
-  
+
     - test<number>.cc
       The main C++ source file for the test.
 
@@ -28,12 +28,9 @@ This script tests the functionality of the library as a single unit.
 
 -- How to Run?
 > python test.py
-> python test.py -threadpool # to test threadpool version
         or
-> python test.py test<n1> test<n2> ... 
-> python test.py -threadpool test<n1> test<n2> ... # to test threadpool version
+> python test.py test<n1> test<n2> ...
 
 -- Notes:
 + Make sure curl.txt and ans.txt have the same number of lines.
 + The script matches each curl output line-by-line with ans.txt
-+ For testing the threadpool version of the library pass '-threadpool' as first argument to the script

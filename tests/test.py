@@ -22,8 +22,6 @@ isjson = {
     "test6",
 }
 
-threadpool = []
-
 CXX = os.environ.get("CXX")
 if CXX is None:
     print("ERROR: No CXX environment variable found! Please read tests/README.txt")
@@ -60,7 +58,7 @@ def compile(name: str, flags: list[str]):
             "-o",
             f"{name}.out",
             file
-        ] + flags + threadpool,
+        ] + flags,
         stderr=subprocess.PIPE,
         stdout=subprocess.DEVNULL,
     )
@@ -148,10 +146,6 @@ def test(path: str, flags: list[str]):
 flags = moduleflags()
 
 args = sys.argv[1:]
-if len(args) > 0 and args[0] == "-threadpool":
-    threadpool.append("-DTHREADPOOL")
-    args = args[1:]
-
 if len(args) > 0:
     for arg in args:
         test(arg, flags)
